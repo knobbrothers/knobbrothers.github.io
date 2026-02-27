@@ -1,0 +1,84 @@
+/* Beat Sequencer — global reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a22;
+  --surface2: #22222e;
+  --border: #2e2e3e;
+  --active: #e87c1a;
+  --active-dim: rgba(232, 124, 26, 0.25);
+  --playhead: #00b4d8;
+  --playhead-dim: rgba(0, 180, 216, 0.22);
+  --text: #e0e0ee;
+  --text-dim: #888899;
+  --muted-color: #444455;
+  --danger: #e84a4a;
+  --surface-alt: #2a2a38;
+  --border-beat: #444466;
+  --header-border: rgba(255, 255, 255, 0.18);
+
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+[data-theme="light"] {
+  --bg: #f0f0f5;
+  --surface: #ffffff;
+  --surface2: #e8e8f0;
+  --surface-alt: #dddde8;
+  --border: #c8c8d8;
+  --border-beat: #9090a8;
+  --header-border: rgba(0, 0, 0, 0.12);
+  --active: #c86a10;
+  --active-dim: rgba(200, 106, 16, 0.2);
+  --playhead: #007a9e;
+  --playhead-dim: rgba(0, 122, 158, 0.18);
+  --text: #1a1a2e;
+  --text-dim: #5a5a6e;
+  --muted-color: #b8b8c8;
+  --danger: #cc2222;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  touch-action: manipulation; /* eliminate 300ms tap delay */
+}
+
+input[type="range"] {
+  cursor: pointer;
+  accent-color: var(--active);
+  touch-action: manipulation;
+}
+
+select {
+  cursor: pointer;
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font: inherit;
+}

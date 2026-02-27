@@ -1,0 +1,181 @@
+.channel-controls {
+  padding: 10px 14px;
+  background: var(--surface);
+}
+
+.params-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.param-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.param-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.param-value {
+  font-size: 11px;
+  color: var(--text);
+  min-width: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.param-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  width: 100px;
+}
+
+.param-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--active);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.param-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+.param-slider.pan-slider::-webkit-slider-thumb {
+  background: var(--playhead);
+}
+
+.params-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Sample control ─────────────────────────────────────────────────────── */
+.sample-ctrl {
+  position: relative;
+}
+
+.sample-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface2);
+  transition: border-color 0.12s;
+  white-space: nowrap;
+}
+
+.sample-btn:hover {
+  border-color: var(--active);
+}
+
+.sample-popover {
+  /* position/top/left set via inline styles (portal, position:fixed) */
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 100;
+  min-width: 160px;
+}
+
+.sample-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.sample-select:hover,
+.sample-select:focus {
+  border-color: var(--active);
+  outline: none;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  background: var(--surface);
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.upload-btn:hover {
+  color: var(--active);
+  border-color: var(--active);
+}
+
+/* ── Icon buttons (delete) ──────────────────────────────────────────────── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+}
+
+.icon-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(232, 74, 74, 0.15);
+  color: var(--danger);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .channel-controls {
+    padding: 8px;
+  }
+
+  .params-row {
+    gap: 10px;
+  }
+
+  .param-slider {
+    width: 70px;
+  }
+}

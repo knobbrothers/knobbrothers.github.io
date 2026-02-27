@@ -1,0 +1,90 @@
+.step-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--step-count), 1fr);
+  gap: 3px;
+  /* Minimum button width of 22px × stepCount so grid never collapses to unusable size */
+  min-width: calc(var(--step-count) * 22px + (var(--step-count) - 1) * 3px);
+  width: 100%;
+}
+
+.step-btn {
+  height: 36px;
+  min-width: 0;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  transition: background 0.05s, border-color 0.05s, transform 0.06s;
+  position: relative;
+  /* Every 4th step gets a subtle left highlight to mark beats */
+}
+
+/* Corner dots via pseudo-element */
+.step-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 2px at 4px 4px, var(--border) 100%, transparent 100%),
+    radial-gradient(circle 2px at calc(100% - 4px) 4px, var(--border) 100%, transparent 100%),
+    radial-gradient(circle 2px at 4px calc(100% - 4px), var(--border) 100%, transparent 100%),
+    radial-gradient(circle 2px at calc(100% - 4px) calc(100% - 4px), var(--border) 100%, transparent 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.step-btn.active::before {
+  background:
+    radial-gradient(circle 2px at 4px 4px, rgba(255,255,255,0.3) 100%, transparent 100%),
+    radial-gradient(circle 2px at calc(100% - 4px) 4px, rgba(255,255,255,0.3) 100%, transparent 100%),
+    radial-gradient(circle 2px at 4px calc(100% - 4px), rgba(255,255,255,0.3) 100%, transparent 100%),
+    radial-gradient(circle 2px at calc(100% - 4px) calc(100% - 4px), rgba(255,255,255,0.3) 100%, transparent 100%);
+}
+
+/* Beat-group visual separator (every 4th step = new beat) */
+.step-btn.beat-start {
+  border-left-color: var(--border-beat);
+}
+
+/* Every other group of 4 steps is slightly brighter */
+.step-btn.beat-group-alt {
+  background: var(--surface-alt);
+}
+
+/* Active (step is ON) */
+.step-btn.active {
+  background: var(--ch-color, var(--active));
+  border-color: var(--ch-color, var(--active));
+}
+
+/* Current step (playhead is here) */
+.step-btn.current {
+  background: var(--playhead-dim);
+  border-color: var(--playhead);
+}
+
+/* Active + current — show both: playhead wins bg, keep active glow */
+.step-btn.active.current {
+  background: var(--playhead);
+  border-color: var(--playhead);
+  box-shadow: inset 0 0 0 2px var(--ch-color, var(--active));
+}
+
+.step-btn:active {
+  transform: scale(0.9);
+}
+
+.step-btn:focus-visible {
+  outline: 2px solid var(--active);
+  outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+  .step-btn {
+    height: 32px;
+    border-radius: 3px;
+  }
+
+  .step-grid {
+    gap: 2px;
+  }
+}

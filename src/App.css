@@ -1,0 +1,107 @@
+/* App layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 0 40px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 48px;
+  border-bottom: 1px solid var(--header-border);
+  background: var(--bg);
+}
+
+.app-header-left { display: flex; align-items: center; gap: 10px; }
+
+.app-logo-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--active);
+  flex-shrink: 0;
+}
+
+.app-logo-name {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.app-logo-808 { color: var(--active); }
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--text-dim);
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.app-body {
+  flex: 1;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Dashed Add Channel button */
+.add-channel-btn {
+  border: 1.5px dashed var(--border);
+  padding: 12px 24px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: transparent;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 4px;
+}
+
+.add-channel-btn:hover:not(:disabled) {
+  border-color: var(--active);
+  color: var(--active);
+}
+
+.add-channel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 10px;
+  }
+
+.app-body {
+    padding: 8px 4px;
+    gap: 3px;
+  }
+
+  .add-channel-btn {
+    min-height: 44px;
+    width: calc(100% - 16px);
+    justify-content: center;
+  }
+}

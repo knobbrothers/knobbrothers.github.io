@@ -1,0 +1,198 @@
+/* ── Trigger button (sits in the app header) ───────────────────────────── */
+.export-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition: border-color 0.12s, color 0.12s;
+  min-height: 34px;
+  margin-left: auto; /* push to far right of header */
+}
+
+.export-trigger-btn:hover {
+  border-color: var(--active);
+  color: var(--active);
+}
+
+@media (max-width: 768px) {
+  .export-trigger-btn {
+    min-height: 44px;
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* ── Modal overlay ─────────────────────────────────────────────────────── */
+.export-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Modal panel ───────────────────────────────────────────────────────── */
+.export-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.export-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.export-modal-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.export-close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, color 0.12s;
+}
+
+.export-close-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+/* ── Option rows ───────────────────────────────────────────────────────── */
+.export-option {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.export-option-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+/* Bitrate radio pills */
+.bitrate-group {
+  display: flex;
+  gap: 6px;
+}
+
+.bitrate-pill {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.bitrate-pill:hover {
+  border-color: var(--active);
+  color: var(--active);
+}
+
+.bitrate-pill.selected {
+  background: var(--active-dim);
+  border-color: var(--active);
+  color: var(--active);
+}
+
+/* Bar count select */
+.export-select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.export-select:focus {
+  outline: 1px solid var(--active);
+}
+
+/* ── Progress ──────────────────────────────────────────────────────────── */
+.export-progress-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.export-progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: var(--surface2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.export-progress-bar-fill {
+  height: 100%;
+  background: var(--active);
+  border-radius: 4px;
+  transition: width 0.2s ease;
+}
+
+.export-progress-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ── Action button ─────────────────────────────────────────────────────── */
+.export-go-btn {
+  padding: 10px 0;
+  border-radius: 6px;
+  background: var(--active);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  transition: opacity 0.15s, transform 0.08s;
+  min-height: 44px;
+}
+
+.export-go-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.export-go-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.export-go-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

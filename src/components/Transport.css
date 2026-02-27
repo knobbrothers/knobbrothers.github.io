@@ -1,0 +1,239 @@
+.transport {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.transport-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.transport-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.transport-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ── Play/Stop ─────────────────────────────────────────────────────────── */
+.play-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 18px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  min-width: 84px;
+  min-height: 36px;
+  border: 1px solid currentColor;
+  transition: opacity 0.15s, transform 0.08s;
+  flex-shrink: 0;
+}
+
+.play-btn.playing {
+  background: transparent;
+  color: var(--danger);
+}
+
+.play-btn.stopped {
+  background: transparent;
+  color: var(--text);
+}
+
+.play-btn:hover {
+  opacity: 0.8;
+}
+
+.play-btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Control group ─────────────────────────────────────────────────────── */
+.ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ── BPM ────────────────────────────────────────────────────────────────── */
+.bpm-divider {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.bpm-input {
+  width: 44px;
+  background: transparent;
+  border: none;
+  color: var(--active);
+  font: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: left;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+
+.bpm-input::-webkit-outer-spin-button,
+.bpm-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.bpm-input:focus {
+  outline: none;
+}
+
+/* ── Swing ──────────────────────────────────────────────────────────────── */
+.ctrl-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.ctrl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--active);
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.ctrl-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.ctrl-slider.swing-slider { width: 80px; }
+
+.ctrl-value {
+  font-size: 11px;
+  color: var(--text-dim);
+  min-width: 28px;
+}
+
+/* ── Length buttons ─────────────────────────────────────────────────────── */
+.length-group { gap: 4px; }
+
+.length-btn {
+  width: 28px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 3px;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+
+.length-btn:hover:not(.active) {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.length-btn.active {
+  background: var(--playhead);
+  border-color: var(--playhead);
+  color: #000;
+}
+
+/* ── Export slot ────────────────────────────────────────────────────────── */
+.transport-export {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Playhead indicator row ────────────────────────────────────────────── */
+.playhead-row {
+  display: flex;
+  gap: 3px;
+  padding: 6px 0 4px;
+  /* Align pips with the step grid — offset by channel-label width + border */
+  padding-left: 181px;
+}
+
+.playhead-pip {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 0.05s;
+}
+
+.playhead-pip.active {
+  background: var(--playhead);
+  box-shadow: 0 0 6px var(--playhead);
+}
+
+/* Beat markers: slightly taller every 4th pip */
+.playhead-pip.beat-start {
+  height: 6px;
+  margin-top: -1px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .transport {
+    padding: 8px 10px 0;
+    gap: 6px;
+  }
+
+  .transport-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .transport-right {
+    gap: 10px;
+  }
+
+  .length-group {
+    display: none;
+  }
+
+  .ctrl-slider.swing-slider {
+    width: 60px;
+  }
+
+  .play-btn {
+    padding: 7px 14px;
+    min-width: 72px;
+  }
+
+  .playhead-row {
+    padding-left: 121px;
+  }
+}

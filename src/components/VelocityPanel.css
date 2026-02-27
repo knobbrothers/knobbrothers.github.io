@@ -1,0 +1,96 @@
+.velocity-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.velocity-header {
+  padding: 6px 14px 2px;
+}
+
+.velocity-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.velocity-panel {
+  display: grid;
+  grid-template-columns: repeat(var(--step-count), 1fr);
+  gap: 3px;
+  padding: 8px 6px 6px;
+  height: 80px;
+  user-select: none;
+  cursor: ns-resize;
+}
+
+/* ── Per-step column ───────────────────────────────────────────────────── */
+.vel-col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.vel-col.dragging,
+.vel-col:hover {
+  border-color: #444466;
+}
+
+/* ── Bar fill ──────────────────────────────────────────────────────────── */
+.vel-bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  background: var(--active);
+  transition: height 0.04s;
+  min-height: 2px;
+}
+
+/* Inactive step: dimmed */
+.vel-col.inactive .vel-bar {
+  background: var(--muted-color);
+  opacity: 0.45;
+}
+
+/* ── Value tooltip ─────────────────────────────────────────────────────── */
+.vel-value {
+  position: absolute;
+  top: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  pointer-events: none;
+  opacity: 0;
+  white-space: nowrap;
+  transition: opacity 0.1s;
+}
+
+.vel-col:hover .vel-value,
+.vel-col.dragging .vel-value {
+  opacity: 1;
+}
+
+/* ── Beat-group separator ──────────────────────────────────────────────── */
+.vel-col.beat-start {
+  border-left-color: #444466;
+}
+
+@media (max-width: 768px) {
+  .velocity-panel {
+    height: 64px;
+    gap: 2px;
+    padding: 6px 4px 4px;
+  }
+
+  .vel-value {
+    font-size: 8px;
+  }
+}

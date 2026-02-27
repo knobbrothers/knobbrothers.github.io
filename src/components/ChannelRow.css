@@ -1,0 +1,203 @@
+.channel-row {
+  background: var(--surface);
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 4px;
+  transition: border-color 0.15s;
+}
+
+.channel-row:focus-within {
+  border-color: var(--border-beat);
+}
+
+/* ── Main row ──────────────────────────────────────────────────────────── */
+.channel-main {
+  display: flex;
+  align-items: center;
+  height: 48px;
+}
+
+/* ── Left label panel ──────────────────────────────────────────────────── */
+.channel-label {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-right: 1px solid var(--border);
+  height: 100%;
+}
+
+/* ── Channel name ──────────────────────────────────────────────────────── */
+.channel-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+  border-radius: 3px;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.channel-name:hover {
+  border-color: var(--border);
+  background: var(--surface2);
+}
+
+.channel-name:focus {
+  outline: none;
+  border-color: var(--active);
+  background: var(--surface2);
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* ── Icon buttons ──────────────────────────────────────────────────────── */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+}
+
+.icon-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.icon-btn.active {
+  color: var(--active);
+}
+
+.icon-btn.muted {
+  color: var(--muted-color);
+}
+
+.icon-btn.solo-btn {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.icon-btn.solo-btn.soloed {
+  color: var(--active);
+  background: rgba(232, 124, 26, 0.15);
+}
+
+.icon-btn.danger:hover {
+  background: rgba(232, 74, 74, 0.15);
+  color: var(--danger);
+}
+
+/* ── Muted state ───────────────────────────────────────────────────────── */
+.channel-row.is-muted .step-btn.active {
+  background: var(--muted-color);
+  border-color: var(--muted-color);
+}
+
+/* ── Solo-silenced state (another channel is soloed) ───────────────────── */
+.channel-row.is-solo-silenced .step-btn.active {
+  background: var(--muted-color);
+  border-color: var(--muted-color);
+}
+
+/* ── Params toggle bar ─────────────────────────────────────────────────── */
+.params-toggle-bar {
+  width: 100%;
+  height: 32px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: color 0.12s, background 0.12s;
+  border-radius: 0;
+}
+
+.params-toggle-bar:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+/* ── Collapsible panels — animated with grid-template-rows ─────────────── */
+.channel-panel-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.channel-panel-wrap.open {
+  grid-template-rows: 1fr;
+}
+
+.channel-panel-inner {
+  overflow: hidden;
+}
+
+.channel-panel {
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+
+/* ── Step grid scroll wrapper ─────────────────────────────────────────── */
+.step-grid-scroll {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0 8px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.step-grid-scroll::-webkit-scrollbar {
+  height: 3px;
+}
+
+.step-grid-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.step-grid-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .channel-label {
+    width: 120px;
+  }
+
+  .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .channel-main {
+    height: 44px;
+  }
+}
