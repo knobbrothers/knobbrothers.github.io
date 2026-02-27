@@ -6,20 +6,20 @@
 }
 
 :root {
-  --bg: #0f0f13;
-  --surface: #1a1a22;
-  --surface2: #22222e;
-  --border: #2e2e3e;
-  --active: #e87c1a;
+  --bg: #2e2e2e;
+  --surface: #1c1c1c;
+  --surface2: #272729;
+  --border: #000000;
+  --active: #7d7d7d;
   --active-dim: rgba(232, 124, 26, 0.25);
-  --playhead: #00b4d8;
-  --playhead-dim: rgba(0, 180, 216, 0.22);
+  --playhead: #00bb46;
+  --playhead-dim: rgb(115 244 50 / 22%);
   --text: #e0e0ee;
   --text-dim: #888899;
-  --muted-color: #444455;
-  --danger: #e84a4a;
-  --surface-alt: #2a2a38;
-  --border-beat: #444466;
+  --muted-color: #000000;
+  --danger: #ffffff;
+  --surface-alt: #343434;
+  --border-beat: #000000;
   --header-border: rgba(255, 255, 255, 0.18);
 
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
