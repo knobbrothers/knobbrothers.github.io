@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import './Transport.css'
 
 export function Transport({
@@ -10,8 +11,10 @@ export function Transport({
   onBpmChange,
   onSwingChange,
   onStepCountChange,
+  onLoadKit,
   exportSlot,
 }) {
+  const kitInputRef = useRef(null)
   function handleBpmInput(e) {
     const v = Number(e.target.value)
     if (!isNaN(v) && v >= 60 && v <= 200) onBpmChange(v)
@@ -48,6 +51,21 @@ export function Transport({
                 PLAY
               </>
             )}
+          </button>
+
+          <input
+            type="file"
+            accept=".wav,.mp3,audio/*"
+            multiple
+            style={{ display: 'none' }}
+            ref={kitInputRef}
+            onChange={e => {
+              if (e.target.files?.length) onLoadKit(e.target.files)
+              e.target.value = ''
+            }}
+          />
+          <button className="load-kit-btn" onClick={() => kitInputRef.current?.click()}>
+            <FolderIcon /> LOAD KIT
           </button>
 
           <div className="ctrl-group bpm-group">
@@ -130,6 +148,14 @@ function StopIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
       <rect x="1" y="1" width="10" height="10" rx="1" />
+    </svg>
+  )
+}
+
+function FolderIcon() {
+  return (
+    <svg width="13" height="11" viewBox="0 0 13 11" fill="currentColor" aria-hidden="true">
+      <path d="M0 2a1 1 0 011-1h3.586l1 1H12a1 1 0 011 1v7a1 1 0 01-1 1H1a1 1 0 01-1-1V2z" />
     </svg>
   )
 }

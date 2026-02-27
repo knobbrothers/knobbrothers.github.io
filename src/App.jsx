@@ -37,6 +37,7 @@ function App() {
     removeChannel,
     addChannel,
     soloChannel,
+    replaceAllChannels,
   } = useSequencer()
 
   const hasSolo = state.channels.some(ch => ch.solo)
@@ -50,7 +51,29 @@ function App() {
       const filtered = prev.filter(s => s.name !== name)
       return [...filtered, { name, objectUrl }]
     })
-    updateChannel(channelId, { sample: name })
+    updateChannel(channelId, { sample: name, name: name.replace(/\.[^/.]+$/, '') })
+  }
+
+  function loadKit(files) {
+    const MAX = 12
+    const toLoad = Array.from(files).slice(0, MAX)
+    if (files.length > MAX) {
+      alert(`Apenas os primeiros ${MAX} samples foram importados (limite de ${MAX} canais).`)
+    }
+    const newSamples = toLoad.map(file => ({
+      name: file.name,
+      objectUrl: URL.createObjectURL(file),
+    }))
+    setCustomSamples(prev => {
+      const filtered = prev.filter(s => !newSamples.some(n => n.name === s.name))
+      return [...filtered, ...newSamples]
+    })
+    replaceAllChannels(
+      toLoad.map(file => ({
+        name: file.name.replace(/\.[^/.]+$/, ''),
+        sample: file.name,
+      }))
+    )
   }
 
   const { initAudio, exportMp3 } = useAudioEngine({ state, setCurrentStep, customSamples })
@@ -86,6 +109,7 @@ function App() {
         onBpmChange={setBpm}
         onSwingChange={setSwing}
         onStepCountChange={setStepCount}
+        onLoadKit={loadKit}
         exportSlot={<ExportPanel onExport={exportMp3} />}
       />
 

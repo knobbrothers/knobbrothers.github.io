@@ -113,6 +113,17 @@ function reducer(state, action) {
       }
     }
 
+    case 'REPLACE_ALL_CHANNELS': {
+      const { channels } = action
+      _nextId = channels.length
+      return {
+        ...state,
+        channels: channels.map((ch, i) =>
+          makeChannel(i, ch.name, ch.sample, 0.8, state.stepCount)
+        ),
+      }
+    }
+
     case 'REMOVE_CHANNEL': {
       return {
         ...state,
@@ -184,6 +195,9 @@ export function useSequencer() {
   const soloChannel = useCallback((channelId) =>
     dispatch({ type: 'SOLO_CHANNEL', channelId }), [])
 
+  const replaceAllChannels = useCallback((channels) =>
+    dispatch({ type: 'REPLACE_ALL_CHANNELS', channels }), [])
+
   return {
     state,
     toggleStep,
@@ -197,5 +211,6 @@ export function useSequencer() {
     setPlaying,
     setCurrentStep,
     soloChannel,
+    replaceAllChannels,
   }
 }

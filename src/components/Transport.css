@@ -204,6 +204,34 @@
   margin-top: -1px;
 }
 
+/* ── Load Kit button ────────────────────────────────────────────────────── */
+.load-kit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  transition: border-color 0.15s, color 0.15s, transform 0.08s;
+  flex-shrink: 0;
+  min-height: 36px;
+}
+
+.load-kit-btn:hover {
+  border-color: var(--text-dim);
+  color: var(--text);
+}
+
+.load-kit-btn:active {
+  transform: scale(0.96);
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .transport {
