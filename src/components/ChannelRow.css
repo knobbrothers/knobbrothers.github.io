@@ -1,203 +1,428 @@
+/* ── Outer card ─────────────────────────────────────────────────────────── */
 .channel-row {
-  background: var(--surface);
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
+  border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 4px;
-  transition: border-color 0.15s;
+  gap: 0;
 }
 
-.channel-row:focus-within {
-  border-color: var(--border-beat);
-}
-
-/* ── Main row ──────────────────────────────────────────────────────────── */
-.channel-main {
+/* ── Channel header ─────────────────────────────────────────────────────── */
+.channel-header {
   display: flex;
   align-items: center;
-  height: 48px;
-}
-
-/* ── Left label panel ──────────────────────────────────────────────────── */
-.channel-label {
-  width: 180px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
+  justify-content: space-between;
   gap: 6px;
-  padding: 0 10px;
-  border-right: 1px solid var(--border);
-  height: 100%;
+  padding: 8px 8px 9px;
+  min-height: 54px;
+  background: rgba(255,255,255,0.15);
+  border-bottom: 1px solid rgba(255,255,255,0.23);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* ── Channel name ──────────────────────────────────────────────────────── */
-.channel-name {
+/* ── Drag handle ────────────────────────────────────────────────────────── */
+.ch-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  flex-shrink: 0;
+  color: var(--border-beat);
+  cursor: grab;
+  transition: color 0.12s;
+  padding: 0 2px;
+}
+
+.ch-drag-handle:hover {
+  color: var(--text-dim);
+}
+
+.channel-row.is-dragging {
+  opacity: 0.4;
+}
+
+.channel-row.is-dragging .ch-drag-handle {
+  cursor: grabbing;
+}
+
+/* ── Solo / Mute buttons ────────────────────────────────────────────────── */
+.ch-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  background: rgba(0,0,0,0.25);
+  color: var(--text-dim);
+  font: 600 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.ch-icon-btn--lg {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.01), rgba(255,255,255,0.03));
+  border: 0.35px solid rgba(0,0,0,0.15);
+}
+
+.ch-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.ch-icon-btn.soloed {
+  color: #ffffff;
+  border-color: rgb(0 0 0 / 19%);
+  background: rgb(0 0 0 / 25%);
+}
+
+.ch-icon-btn.muted {
+  color: var(--mute-color);
+  border-color: var(--mute-color);
+  background: rgba(224, 68, 68, 0.1);
+}
+
+.ch-icon-btn.danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ── Channel name ───────────────────────────────────────────────────────── */
+.ch-name-wrap {
   flex: 1;
   min-width: 0;
-  font-size: 12px;
-  font-weight: 600;
+}
+
+.ch-name {
+  width: 100%;
+  font: 600 14px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.275px;
   color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: text;
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: 3px;
   padding: 2px 4px;
-  border: 1px solid transparent;
-  background: transparent;
+  min-width: 0;
+  cursor: default;
   transition: border-color 0.12s, background 0.12s;
 }
 
-.channel-name:hover {
-  border-color: var(--border);
+.ch-name:focus {
+  border-color: var(--border-beat);
   background: var(--surface2);
-}
-
-.channel-name:focus {
   outline: none;
-  border-color: var(--active);
-  background: var(--surface2);
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
+  cursor: text;
 }
 
-/* ── Icon buttons ──────────────────────────────────────────────────────── */
-.icon-btn {
+/* ── Right action buttons ────────────────────────────────────────────────── */
+.ch-right-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 4px;
-  color: var(--text-dim);
+  gap: 16px;
   flex-shrink: 0;
-  transition: background 0.12s, color 0.12s;
 }
 
-.icon-btn:hover {
+/* ── Context menu ────────────────────────────────────────────────────────── */
+.ch-ctx-wrap {
+  position: relative;
+}
+
+.ch-ctx-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 300;
+  min-width: 130px;
   background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.ch-ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-dim);
+  font: 600 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+
+.ch-ctx-item:hover {
+  background: var(--surface-alt);
   color: var(--text);
 }
 
-.icon-btn.active {
-  color: var(--active);
-}
-
-.icon-btn.muted {
-  color: var(--muted-color);
-}
-
-.icon-btn.solo-btn {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.icon-btn.solo-btn.soloed {
-  color: var(--active);
-  background: rgba(232, 124, 26, 0.15);
-}
-
-.icon-btn.danger:hover {
-  background: rgba(232, 74, 74, 0.15);
+.ch-ctx-item.danger:hover {
+  background: rgba(224, 68, 68, 0.1);
   color: var(--danger);
 }
 
-/* ── Muted state ───────────────────────────────────────────────────────── */
-.channel-row.is-muted .step-btn.active {
-  background: var(--muted-color);
-  border-color: var(--muted-color);
+.ch-ctx-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 6px;
 }
 
-/* ── Solo-silenced state (another channel is soloed) ───────────────────── */
-.channel-row.is-solo-silenced .step-btn.active {
-  background: var(--muted-color);
-  border-color: var(--muted-color);
-}
-
-/* ── Params toggle bar ─────────────────────────────────────────────────── */
-.params-toggle-bar {
-  width: 100%;
-  height: 32px;
-  background: var(--surface2);
-  border-top: 1px solid var(--border);
+/* ── Step grid inner card ───────────────────────────────────────────────── */
+.ch-grid-card {
+  height: 100%;
+  padding: 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── Expansion toggle bar ───────────────────────────────────────────────── */
+.ch-expand-bar {
+  width: 100%;
+  background: #1b1d1840;
+  font: 600 8px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--text-dim);
-  transition: color 0.12s, background 0.12s;
-  border-radius: 0;
-}
-
-.params-toggle-bar:hover {
   color: var(--text);
-  background: var(--surface);
+  text-align: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color 0.12s;
+  margin: 1px 1px;
+  padding: 4px 8px;
 }
 
-/* ── Collapsible panels — animated with grid-template-rows ─────────────── */
-.channel-panel-wrap {
+.ch-expand-bar:hover {
+  color: var(--text);
+}
+
+/* ── Expansion panel (collapsible) ──────────────────────────────────────── */
+.ch-expand-wrap {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.22s ease;
+  transition: grid-template-rows 0.2s ease;
 }
 
-.channel-panel-wrap.open {
+.ch-expand-wrap.open {
   grid-template-rows: 1fr;
 }
 
-.channel-panel-inner {
+.ch-expand-inner {
   overflow: hidden;
 }
 
-.channel-panel {
-  border-top: 1px solid var(--border);
+/* ── Sub-rows (velocity/prob/multiply) ──────────────────────────────────── */
+.ch-subrows {
+  padding: 8px 8px;
+  background: #ffffff0a;
+  border-top: 1px solid #ffffff33;
+  display: flex;
+  flex-direction: column;
+}
+
+.ch-subrow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  height: 100%;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 8px 0px;
+}
+
+.ch-subrow-label {
+  width: 60px;
+  flex-shrink: 0;
+  font: 600 8px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+}
+
+.ch-subrow-steps {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+}
+
+.ch-subrow-group {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+}
+
+.ch-subrow-cell {
+  flex: 1;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  font: 600 9px/1 monospace;
+  color: var(--text);
+  background: var(--surface);
+  border-bottom: 1px solid #ffffff45;
+  border-radius: 4px;
+  cursor: ns-resize;
+  user-select: none;
+  transition: border-color 0.1s;
+  min-width: 0;
+  height: 32px;
+  padding-bottom: 2px;
+}
+
+.ch-subrow-cell:hover {
+  border-color: var(--text-dim);
+}
+
+.ch-subrow-cell.inactive {
+  color: var(--text-dim);
   background: var(--surface2);
 }
 
-/* ── Step grid scroll wrapper ─────────────────────────────────────────── */
-.step-grid-scroll {
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  padding: 0 8px;
-  height: 100%;
+.ch-subrow-cell.dragging {
+  border-color: var(--active);
+  color: var(--active);
+}
+
+/* Roll cells cycle on click */
+.ch-subrow-cell.roll-cell {
+  cursor: pointer;
+  color: var(--text-dim);
+}
+
+.ch-subrow-cell.roll-cell.active-roll {
+  color: var(--accent-orange);
+  border-color: var(--accent-orange);
+}
+
+/* ── Bottom controls bar ─────────────────────────────────────────────────── */
+.ch-controls-bar {
   display: flex;
   align-items: center;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  justify-content: space-between;
+  gap: 48px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255,255,255,0.25);
 }
 
-.step-grid-scroll::-webkit-scrollbar {
-  height: 3px;
+.ch-ctrl-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.step-grid-scroll::-webkit-scrollbar-track {
-  background: transparent;
+.ch-ctrl-label {
+  font: 600 10px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.5);
+  white-space: nowrap;
+  width: auto;
 }
 
-.step-grid-scroll::-webkit-scrollbar-thumb {
-  background: var(--border);
+.ch-ctrl-value {
+  font: 600 10px/1 monospace;
+  color: var(--text);
+  min-width: 24px;
+}
+
+.ch-ctrl-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.15);
+  box-shadow: inset 0 1px 3px black;
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--accent-orange);
+}
+
+.ch-ctrl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 21px;
   border-radius: 2px;
+  background: linear-gradient(to bottom, #333, #111 50%, #000);
+  border: 1px solid #444;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
 }
 
-/* ── Responsive ────────────────────────────────────────────────────────── */
+.ch-ctrl-slider::-moz-range-thumb {
+  width: 16px;
+  height: 21px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #333, #111 50%, #000);
+  border: 1px solid #444;
+  cursor: pointer;
+}
+
+.ch-controls-bar-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ch-ctrl-pill-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 17px;
+  height: 32px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom, #424242, black 78.8%, #343434);
+  border: 1px solid black;
+  box-shadow: inset 1px 2px 2px 0 rgba(255, 255, 255, 0.45);
+  font: 500 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.ch-ctrl-pill-btn:hover {
+  color: var(--text);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.ch-ctrl-pill-btn.danger:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Muted/solo-silenced channel look */
+.channel-row.is-muted .ch-name,
+.channel-row.is-solo-silenced .ch-name {
+  opacity: 0.5;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .channel-label {
-    width: 120px;
+  .ch-icon-btn {
+    width: 22px;
+    height: 22px;
   }
 
-  .icon-btn {
-    width: 28px;
-    height: 28px;
-  }
-
-  .channel-main {
-    height: 44px;
+  .ch-ctrl-slider {
+    width: 60px;
   }
 }

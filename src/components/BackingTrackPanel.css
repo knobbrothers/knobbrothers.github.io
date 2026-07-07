@@ -1,0 +1,152 @@
+.backing-panel {
+  border-top: 1px solid var(--border);
+  padding: 12px 20px 16px;
+  background: var(--surface);
+}
+
+.backing-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.backing-panel-title {
+  font: 700 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  flex: 1;
+}
+
+.backing-add-btn {
+  font: 700 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.backing-add-btn:hover {
+  color: var(--text);
+  border-color: #444;
+}
+
+.backing-empty {
+  font: 400 11px/1.5 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: var(--text-dim);
+  margin: 0;
+  opacity: 0.6;
+}
+
+.backing-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.backing-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.backing-track.inactive {
+  opacity: 0.5;
+}
+
+.backing-active-btn {
+  font-size: 14px;
+  line-height: 1;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-dim);
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+
+.backing-active-btn.on {
+  color: var(--playhead);
+}
+
+.backing-name {
+  font: 600 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.backing-vol-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.backing-vol-label {
+  font: 700 9px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.backing-vol-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.backing-vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+}
+
+.backing-vol-value {
+  font: 600 10px/1 monospace;
+  color: var(--text-dim);
+  min-width: 28px;
+  text-align: right;
+}
+
+.backing-remove-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.12s;
+}
+
+.backing-remove-btn:hover {
+  color: var(--danger);
+}

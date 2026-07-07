@@ -1,31 +1,22 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { useSequencer } from './hooks/useSequencer'
 import { useAudioEngine } from './hooks/useAudioEngine'
+import { useBackingTrack } from './hooks/useBackingTrack'
 import { Transport } from './components/Transport'
 import { ChannelRow } from './components/ChannelRow'
-import { VelocityPanel } from './components/VelocityPanel'
-import { ChannelControls } from './components/ChannelControls'
-import { ExportPanel } from './components/ExportPanel'
+import { PatternTabs } from './components/PatternTabs'
+import { PatternCard } from './components/PatternCard'
+import { BackingTrackPanel } from './components/BackingTrackPanel'
+import { NewProjectModal } from './components/NewProjectModal'
+import HelpModal from './components/HelpModal'
+import { serializeState, deserializeState, downloadPatternFile, encodeForUrl, decodeFromUrl } from './lib/serialize'
 import './App.css'
 
 function App() {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('sq32-theme') || 'dark'
-    document.documentElement.dataset.theme = saved
-    return saved
-  })
-
-  useEffect(() => {
-    document.documentElement.dataset.theme = theme
-    localStorage.setItem('sq32-theme', theme)
-  }, [theme])
-
-  function toggleTheme() {
-    setTheme(t => t === 'dark' ? 'light' : 'dark')
-  }
-
   const {
     state,
+    canUndo,
+    canRedo,
     setPlaying,
     setCurrentStep,
     setBpm,
@@ -33,16 +24,197 @@ function App() {
     setStepCount,
     toggleStep,
     setVelocity,
+    setProbability,
+    setRoll,
     updateChannel,
     removeChannel,
+    duplicateChannel,
     addChannel,
     soloChannel,
-    replaceAllChannels,
+    loadState,
+    undo,
+    redo,
+    setCurrentPattern,
+    toggleSongMode,
+    advanceSongPattern,
+    reorderPatterns,
+    newProject,
+    addBackingTrack,
+    removeBackingTrack,
+    updateBackingTrack,
+    addChannelWithSample,
+    reorderChannels,
+    setMasterVolume,
+    addPattern,
+    removePattern,
   } = useSequencer()
+
+  // ── Restore toast ────────────────────────────────────────────────────────
+  const [restored, setRestored] = useState(false)
+  const [shareToast, setShareToast] = useState(false)
+  const [showNewModal, setShowNewModal] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
+
+  // ── Channel clipboard (copy/paste steps) ─────────────────────────────────
+  const [channelClipboard, setChannelClipboard] = useState(null) // { steps, velocity, probability, roll }
+
+  // ── Expanded channel (single-at-a-time) ──────────────────────────────────
+  const [expandedChannelId, setExpandedChannelId] = useState(null)
+
+  function handleToggleExpand(channelId) {
+    setExpandedChannelId(prev => prev === channelId ? null : channelId)
+  }
+
+  // Auto-save to localStorage — debounced 1s after any persisted change.
+  // Keyed on the fields serializeState actually saves, NOT the whole state:
+  // playhead ticks replace `state` every step and would reset the debounce
+  // forever, so autosave would never fire during playback.
+  const autoSaveTimer = useRef(null)
+  useEffect(() => {
+    clearTimeout(autoSaveTimer.current)
+    autoSaveTimer.current = setTimeout(() => {
+      localStorage.setItem('sq32-autosave', serializeState(state))
+    }, 1000)
+    return () => clearTimeout(autoSaveTimer.current)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.patterns, state.projectName, state.masterVolume])
+
+  // On mount: check URL hash for shared pattern, then restore auto-save
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash && hash.length > 1) {
+      try {
+        const data = decodeFromUrl(hash)
+        if (window.confirm('Load shared pattern from link?')) {
+          loadState(deserializeState(JSON.stringify(data)))
+          window.location.hash = ''
+          return
+        }
+      } catch {
+        window.location.hash = ''
+      }
+    }
+
+    const saved = localStorage.getItem('sq32-autosave')
+    if (!saved) return
+    try {
+      loadState(deserializeState(saved))
+      setRestored(true)
+      setTimeout(() => setRestored(false), 3000)
+    } catch { /* corrupt data — ignore */ }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const hasSolo = state.channels.some(ch => ch.solo)
 
   const [customSamples, setCustomSamples] = useState([])   // { name, objectUrl }[]
+
+  // ── Drag-and-drop sample import ───────────────────────────────────────────
+  const dragCounter = useRef(0)
+  const [isDragging, setIsDragging] = useState(false)
+
+  // ── Channel drag-to-reorder ────────────────────────────────────────────────
+  const [draggingIdx, setDraggingIdx] = useState(null)
+  const [dropInsert,  setDropInsert]  = useState(null)
+
+  function handleChannelDragStart(idx) {
+    setDraggingIdx(idx)
+  }
+
+  function handleChannelDragOver(e, idx) {
+    e.preventDefault()
+    if (draggingIdx === null || draggingIdx === idx) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const insertBefore = (e.clientY - rect.top) < rect.height / 2 ? idx : idx + 1
+    setDropInsert(insertBefore)
+  }
+
+  function handleChannelDrop(e) {
+    e.preventDefault()
+    if (draggingIdx !== null && dropInsert !== null &&
+        dropInsert !== draggingIdx && dropInsert !== draggingIdx + 1) {
+      reorderChannels(draggingIdx, dropInsert)
+    }
+    setDraggingIdx(null)
+    setDropInsert(null)
+  }
+
+  function handleChannelDragEnd() {
+    setDraggingIdx(null)
+    setDropInsert(null)
+  }
+
+  function handleFileDrop(files) {
+    const audioFiles = Array.from(files).filter(f =>
+      f.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|aiff?)$/i.test(f.name)
+    )
+    if (audioFiles.length === 0) return
+
+    const remaining = 12 - state.channels.length
+    if (remaining === 0) {
+      alert('Channel limit of 12 reached. Remove a channel before adding more.')
+      return
+    }
+
+    const toAdd = audioFiles.slice(0, remaining)
+    toAdd.forEach(file => {
+      const objectUrl = URL.createObjectURL(file)
+      const name = file.name
+      setCustomSamples(prev => [...prev.filter(s => s.name !== name), { name, objectUrl }])
+      addChannelWithSample(name.replace(/\.[^.]+$/, ''), name, 0.8)
+    })
+
+    if (audioFiles.length > remaining) {
+      alert(`Only ${remaining} file(s) added — channel limit of 12 reached.`)
+    }
+  }
+
+  // ── Save / Load ──────────────────────────────────────────────────────────
+  function handleSave() {
+    downloadPatternFile(state)
+  }
+
+  function handleLoad(file) {
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        loadState(deserializeState(e.target.result, file.name))
+      } catch {
+        alert('Invalid or corrupted pattern file.')
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  // ── New project ──────────────────────────────────────────────────────────
+  function handleNew() {
+    if (!window.confirm('Start a new project? All unsaved changes will be lost.')) return
+    setShowNewModal(true)
+  }
+
+  function handleNewConfirm({ name, stepCount, kit }) {
+    setShowNewModal(false)
+    state.backingTracks.forEach(t => {
+      if (t.objectUrl?.startsWith('blob:')) URL.revokeObjectURL(t.objectUrl)
+    })
+    customSamples.forEach(s => {
+      if (s.objectUrl?.startsWith('blob:')) URL.revokeObjectURL(s.objectUrl)
+    })
+    setCustomSamples([])
+    localStorage.removeItem('sq32-autosave')
+    newProject(kit, stepCount, name)
+  }
+
+  // ── Share ────────────────────────────────────────────────────────────────
+  function handleShare() {
+    const encoded = encodeForUrl(state)
+    const url     = `${window.location.origin}${window.location.pathname}#${encoded}`
+    navigator.clipboard.writeText(url).then(() => {
+      setShareToast(true)
+      setTimeout(() => setShareToast(false), 2500)
+    }).catch(() => {
+      window.location.hash = encoded
+    })
+  }
 
   function addCustomSample(channelId, file) {
     const name = file.name
@@ -54,124 +226,272 @@ function App() {
     updateChannel(channelId, { sample: name, name: name.replace(/\.[^/.]+$/, '') })
   }
 
-  function loadKit(files) {
-    const MAX = 12
-    const toLoad = Array.from(files).slice(0, MAX)
-    if (files.length > MAX) {
-      alert(`Apenas os primeiros ${MAX} samples foram importados (limite de ${MAX} canais).`)
+  // ── Duplicate channel ────────────────────────────────────────────────────
+  function handleDuplicateChannel(channel) {
+    if (state.channels.length >= 12) {
+      alert('Channel limit of 12 reached.')
+      return
     }
-    const newSamples = toLoad.map(file => ({
-      name: file.name,
-      objectUrl: URL.createObjectURL(file),
-    }))
-    setCustomSamples(prev => {
-      const filtered = prev.filter(s => !newSamples.some(n => n.name === s.name))
-      return [...filtered, ...newSamples]
-    })
-    replaceAllChannels(
-      toLoad.map(file => ({
-        name: file.name.replace(/\.[^/.]+$/, ''),
-        sample: file.name,
-      }))
-    )
+    duplicateChannel(channel.id)
   }
 
-  const { initAudio, exportMp3 } = useAudioEngine({ state, setCurrentStep, customSamples })
+  // ── Channel copy/paste ───────────────────────────────────────────────────
+  function handleCopyChannel(channel) {
+    setChannelClipboard({
+      steps:       [...channel.steps],
+      velocity:    [...channel.velocity],
+      probability: [...(channel.probability ?? channel.steps.map(() => 100))],
+      roll:        [...(channel.roll ?? channel.steps.map(() => 1))],
+    })
+  }
+
+  function handlePasteChannel(channel) {
+    if (!channelClipboard) return
+    const len = channel.steps.length
+    channelClipboard.steps.forEach((active, i) => {
+      if (i < len) {
+        if (active !== channel.steps[i]) toggleStep(channel.id, i)
+      }
+    })
+    channelClipboard.velocity.forEach((v, i) => {
+      if (i < len) setVelocity(channel.id, i, v)
+    })
+    channelClipboard.probability.forEach((p, i) => {
+      if (i < len) setProbability(channel.id, i, p)
+    })
+    channelClipboard.roll.forEach((r, i) => {
+      if (i < len) setRoll(channel.id, i, r)
+    })
+  }
+
+  const onLoopEnd = useCallback(() => {
+    if (state.songMode) advanceSongPattern()
+  }, [state.songMode, advanceSongPattern])
+
+  const { initAudio, exportMp3, nextBarTime } = useAudioEngine({
+    state,
+    setCurrentStep,
+    customSamples,
+    onLoopEnd,
+  })
+
+  // Backing track loop engine
+  useBackingTrack({
+    backingTracks: state.backingTracks,
+    playing:       state.playing,
+    nextBarTime,
+    getCtx:        initAudio,
+  })
 
   function handlePlayStop() {
     initAudio()
     setPlaying(!state.playing)
   }
 
+  useEffect(() => {
+    function onKeyDown(e) {
+      const tag = document.activeElement?.tagName
+      const inInput = ['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) ||
+                      document.activeElement?.isContentEditable
+
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ' && !e.shiftKey) {
+        if (inInput) return
+        e.preventDefault()
+        undo()
+        return
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.code === 'KeyZ' && e.shiftKey) {
+        if (inInput) return
+        e.preventDefault()
+        redo()
+        return
+      }
+
+      if (e.code !== 'Space') return
+      if (inInput) return
+      if (tag === 'BUTTON' && !document.activeElement?.classList.contains('step-btn')) return
+      e.preventDefault()
+      handlePlayStop()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+    // handlePlayStop is re-created each render but only reads state.playing,
+    // which is already a dep — no need to re-subscribe on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.playing, undo, redo])
+
+  const displayStep = (state.songMode && state.playing && state.currentPatternIdx !== state.playingPatternIdx)
+    ? -1
+    : state.currentStep
+
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="app-header-left">
-          <span className="app-logo-dot" aria-hidden="true" />
-          <span className="app-logo-name">Knobbrothers <span className="app-logo-808">SQ-32</span></span>
-        </div>
-        <button
-          className="theme-toggle"
-          onClick={toggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-        </button>
-      </header>
+      {restored && <div className="restore-toast">Session restored</div>}
+      {shareToast && <div className="restore-toast">Link copied!</div>}
+      {showNewModal && (
+        <NewProjectModal
+          onConfirm={handleNewConfirm}
+          onCancel={() => setShowNewModal(false)}
+        />
+      )}
+      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
 
       <Transport
-        bpm={state.bpm}
-        swing={state.swing}
-        stepCount={state.stepCount}
-        playing={state.playing}
-        currentStep={state.currentStep}
-        onPlayStop={handlePlayStop}
-        onBpmChange={setBpm}
-        onSwingChange={setSwing}
-        onStepCountChange={setStepCount}
-        onLoadKit={loadKit}
-        exportSlot={<ExportPanel onExport={exportMp3} />}
+        onSave={handleSave}
+        onLoad={handleLoad}
+        onNew={handleNew}
+        onShare={handleShare}
+        onHelp={() => setShowHelp(true)}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onExport={exportMp3}
+        patterns={state.patterns}
       />
 
-      <main className="app-body">
-        {state.channels.map(ch => (
-          <ChannelRow
-            key={ch.id}
-            channel={ch}
-            stepCount={state.stepCount}
-            currentStep={state.currentStep}
-            onToggleStep={toggleStep}
-            onUpdateChannel={updateChannel}
-            hasSolo={hasSolo}
-            onSoloChannel={soloChannel}
-            controlsPanel={
-              <>
-                <ChannelControls
+      <div className="sticky-bar">
+        <PatternTabs
+          playing={state.playing}
+          onPlayStop={handlePlayStop}
+          bpm={state.bpm}
+          onBpmChange={setBpm}
+          patterns={state.patterns}
+          currentIdx={state.currentPatternIdx}
+          onSelect={setCurrentPattern}
+          songMode={state.songMode}
+          onReorder={reorderPatterns}
+          onToggleSongMode={toggleSongMode}
+          playingPatternIdx={state.playingPatternIdx}
+          stepCount={state.stepCount}
+          onSetStepCount={setStepCount}
+          masterVolume={state.masterVolume}
+          onSetMasterVolume={setMasterVolume}
+          swing={state.swing}
+          onSetSwing={setSwing}
+          onAddPattern={addPattern}
+        />
+
+        {/* Playhead pips row */}
+        <div className="steps-row">
+          {Array.from({ length: state.stepCount }, (_, i) => (
+            <div
+              key={i}
+              className={[
+                'playhead-pip',
+                i === state.currentStep ? 'active' : '',
+              ].filter(Boolean).join(' ')}
+            />
+          ))}
+        </div>
+      </div>
+
+      <main
+        className="app-body"
+        onDragEnter={e => {
+          if (!e.dataTransfer.types.includes('Files')) return
+          dragCounter.current++
+          setIsDragging(true)
+        }}
+        onDragOver={e => {
+          if (!e.dataTransfer.types.includes('Files')) return
+          e.preventDefault()
+        }}
+        onDragLeave={e => {
+          // Only count leaves that match a counted enter, so non-file drags
+          // (text, DOM nodes) can't drive the counter negative and wedge the overlay.
+          if (!e.dataTransfer.types.includes('Files')) return
+          dragCounter.current = Math.max(0, dragCounter.current - 1)
+          if (dragCounter.current === 0) setIsDragging(false)
+        }}
+        onDrop={e => {
+          e.preventDefault()
+          dragCounter.current = 0
+          setIsDragging(false)
+          handleFileDrop(e.dataTransfer.files)
+        }}
+      >
+        {isDragging && (
+          <div className="drag-overlay">
+            <span className="drag-overlay-label">Drop audio files to add channels</span>
+          </div>
+        )}
+
+        {/* Song mode: pattern card grid */}
+        {state.songMode ? (
+          <div className="song-view">
+            {state.patterns.map((pattern, idx) => (
+              <PatternCard
+                key={pattern.id}
+                pattern={pattern}
+                isActive={idx === state.currentPatternIdx}
+                isPlaying={state.playing && idx === state.playingPatternIdx}
+                stepCount={pattern.stepCount}
+                onClick={() => setCurrentPattern(idx)}
+                onRemove={state.patterns.length > 1 ? () => removePattern(pattern.id) : null}
+              />
+            ))}
+            {state.patterns.length < 4 && (
+              <button className="pattern-card-create" onClick={addPattern}>
+                <span className="pattern-card-create-label">
+                  + Create Pattern {['A','B','C','D'][state.patterns.length]}
+                </span>
+              </button>
+            )}
+          </div>
+        ) : (
+          /* Pattern mode: channel rows */
+          <>
+            {state.channels.map((ch, idx) => (
+              <Fragment key={ch.id}>
+                {dropInsert === idx && <div className="channel-drop-indicator" />}
+                <ChannelRow
                   channel={ch}
+                  stepCount={state.stepCount}
+                  currentStep={displayStep}
+                  onToggleStep={toggleStep}
                   onUpdateChannel={updateChannel}
+                  onSetVelocity={setVelocity}
+                  onSetProbability={setProbability}
+                  onSetRoll={setRoll}
                   onRemoveChannel={removeChannel}
-                  customSamples={customSamples}
                   onUploadSample={addCustomSample}
+                  hasSolo={hasSolo}
+                  onSoloChannel={soloChannel}
+                  isDragging={draggingIdx === idx}
+                  onChannelDragStart={() => handleChannelDragStart(idx)}
+                  onChannelDragOver={e => handleChannelDragOver(e, idx)}
+                  onChannelDrop={handleChannelDrop}
+                  onChannelDragEnd={handleChannelDragEnd}
+                  isExpanded={expandedChannelId === ch.id}
+                  onToggleExpand={() => handleToggleExpand(ch.id)}
+                  onDuplicateChannel={() => handleDuplicateChannel(ch)}
+                  onCopyChannel={() => handleCopyChannel(ch)}
+                  onPasteChannel={channelClipboard ? () => handlePasteChannel(ch) : null}
                 />
-                <VelocityPanel channel={ch} onSetVelocity={setVelocity} />
-              </>
-            }
-          />
-        ))}
+              </Fragment>
+            ))}
+            {dropInsert === state.channels.length && <div className="channel-drop-indicator" />}
 
-        <button
-          className="add-channel-btn"
-          onClick={addChannel}
-          disabled={state.channels.length >= 12}
-        >
-          <PlusIcon /> ADD CHANNEL ({state.channels.length}/12)
-        </button>
+            <button
+              className="add-channel-btn"
+              onClick={addChannel}
+              disabled={state.channels.length >= 12}
+            >
+              <PlusIcon /> ADD CHANNEL ({state.channels.length}/12)
+            </button>
+          </>
+        )}
       </main>
+
+      <BackingTrackPanel
+        backingTracks={state.backingTracks}
+        onAdd={addBackingTrack}
+        onRemove={removeBackingTrack}
+        onUpdate={updateBackingTrack}
+      />
     </div>
-  )
-}
-
-function SunIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1" x2="12" y2="3"/>
-      <line x1="12" y1="21" x2="12" y2="23"/>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1" y1="12" x2="3" y2="12"/>
-      <line x1="21" y1="12" x2="23" y2="12"/>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
-  )
-}
-
-function MoonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-    </svg>
   )
 }
 

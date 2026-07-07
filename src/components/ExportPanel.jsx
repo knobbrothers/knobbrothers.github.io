@@ -4,14 +4,15 @@ import './ExportPanel.css'
 const BITRATES = [128, 192, 320]
 const BAR_OPTIONS = [1, 2, 4, 8]
 
-export function ExportPanel({ onExport }) {
-  const [open,     setOpen]     = useState(false)
+export function ExportPanel({ open, onClose, onExport, patterns }) {
   const [bitrate,  setBitrate]  = useState(192)
   const [numBars,  setNumBars]  = useState(4)
+  const [mode,     setMode]     = useState('current')  // 'current' | 'song'
   const [progress, setProgress] = useState(null)   // null = idle, 0–1 = rendering
   const [error,    setError]    = useState(null)
 
-  const busy = progress !== null && progress < 1
+  const busy          = progress !== null && progress < 1
+  const canSongMode   = patterns?.length > 1
 
   const handleExport = useCallback(async () => {
     setError(null)
@@ -20,33 +21,24 @@ export function ExportPanel({ onExport }) {
       await onExport({
         numBars,
         bitrate,
+        mode:        canSongMode ? mode : 'current',
+        patterns,
         onProgress: (p) => setProgress(p),
       })
       // Brief "done" flash before resetting
       setTimeout(() => {
         setProgress(null)
-        setOpen(false)
+        onClose()
       }, 800)
     } catch (err) {
       console.error('[export] failed:', err)
       setError('Export failed. See console for details.')
       setProgress(null)
     }
-  }, [onExport, numBars, bitrate])
+  }, [onExport, onClose, numBars, bitrate, mode, patterns, canSongMode])
 
   return (
     <>
-      {/* Trigger button — lives in the app header */}
-      <button
-        className="export-trigger-btn"
-        onClick={() => setOpen(true)}
-        aria-haspopup="dialog"
-        aria-label="Export MP3"
-      >
-        <DownloadIcon />
-        Export MP3
-      </button>
-
       {/* Modal */}
       {open && (
         <div
@@ -54,7 +46,7 @@ export function ExportPanel({ onExport }) {
           role="dialog"
           aria-modal="true"
           aria-label="Export MP3"
-          onClick={e => { if (e.target === e.currentTarget && !busy) setOpen(false) }}
+          onClick={e => { if (e.target === e.currentTarget && !busy) onClose() }}
         >
           <div className="export-modal">
 
@@ -63,13 +55,33 @@ export function ExportPanel({ onExport }) {
               <span className="export-modal-title">Export MP3</span>
               <button
                 className="export-close-btn"
-                onClick={() => setOpen(false)}
+                onClick={() => onClose()}
                 disabled={busy}
                 aria-label="Close"
               >
                 <CloseIcon />
               </button>
             </div>
+
+            {/* Mode toggle (only when arrangement has >1 pattern) */}
+            {canSongMode && (
+              <div className="export-option">
+                <span className="export-option-label">Mode</span>
+                <div className="bitrate-group">
+                  {(['current', 'song']).map(m => (
+                    <button
+                      key={m}
+                      className={`bitrate-pill${mode === m ? ' selected' : ''}`}
+                      onClick={() => setMode(m)}
+                      disabled={busy}
+                      aria-pressed={mode === m}
+                    >
+                      {m === 'current' ? 'Pattern' : 'Song'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Bitrate */}
             <div className="export-option">
@@ -91,7 +103,9 @@ export function ExportPanel({ onExport }) {
 
             {/* Bar count */}
             <div className="export-option">
-              <span className="export-option-label">Repetitions</span>
+              <span className="export-option-label">
+                {mode === 'song' && canSongMode ? 'Bars per pattern' : 'Repetitions'}
+              </span>
               <select
                 className="export-select"
                 value={numBars}

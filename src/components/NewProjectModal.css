@@ -1,0 +1,97 @@
+.npm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.npm-card {
+  width: 340px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.npm-title {
+  font: 700 14px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+}
+
+.npm-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font: 600 10px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.npm-input,
+.npm-select {
+  font: 400 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color .12s;
+}
+
+.npm-input:focus,
+.npm-select:focus {
+  border-color: var(--active);
+}
+
+.npm-select {
+  cursor: pointer;
+}
+
+.npm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.npm-btn {
+  padding: 7px 18px;
+  font: 600 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color .12s, background .12s;
+}
+
+.npm-btn:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.npm-btn--primary {
+  background: var(--active);
+  border-color: var(--active);
+  color: #000;
+}
+
+.npm-btn--primary:hover {
+  filter: brightness(1.1);
+  color: #000;
+}

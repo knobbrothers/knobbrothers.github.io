@@ -1,0 +1,147 @@
+.pattern-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100px;
+}
+
+.pattern-card:hover {
+  border-color: var(--border-beat);
+  background: var(--surface-alt);
+}
+
+.pattern-card.active {
+  border-color: var(--active);
+}
+
+.pattern-card.playing {
+  border-color: var(--play-color);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.pc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pc-name {
+  font: 800 18px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.pc-meta {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.pc-bpm,
+.pc-steps {
+  font: 600 9px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+.pc-remove {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+  flex-shrink: 0;
+}
+
+.pc-remove:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ── Mini step grid ─────────────────────────────────────────────────────── */
+.pc-grid {
+  display: flex;
+  gap: 8px;
+}
+
+.pc-group {
+  display: flex;
+  gap: 3px;
+  flex: 1;
+}
+
+.pc-step {
+  flex: 1;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.pc-step.active {
+  background: var(--active);
+  border-color: var(--active);
+}
+
+/* ── Playing badge ──────────────────────────────────────────────────────── */
+.pc-playing-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font: 700 8px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--play-color);
+  background: rgba(143, 168, 76, 0.1);
+  border: 1px solid var(--play-color);
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+/* ── Create pattern card ────────────────────────────────────────────────── */
+.pattern-card-create {
+  background: transparent;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+  color: var(--text-dim);
+  font: inherit;
+}
+
+.pattern-card-create:hover {
+  border-color: var(--active);
+  color: var(--active);
+}
+
+.pattern-card-create-label {
+  font: 700 12px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}

@@ -1,32 +1,3 @@
-/* ── Trigger button (sits in the app header) ───────────────────────────── */
-.export-trigger-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-  transition: border-color 0.12s, color 0.12s;
-  min-height: 34px;
-  margin-left: auto; /* push to far right of header */
-}
-
-.export-trigger-btn:hover {
-  border-color: var(--active);
-  color: var(--active);
-}
-
-@media (max-width: 768px) {
-  .export-trigger-btn {
-    min-height: 44px;
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-}
-
 /* ── Modal overlay ─────────────────────────────────────────────────────── */
 .export-overlay {
   position: fixed;

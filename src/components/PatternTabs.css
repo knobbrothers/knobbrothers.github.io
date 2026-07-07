@@ -1,0 +1,316 @@
+.pattern-bar {
+  background: rgba(255,255,255,0.13);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  box-shadow: inset 1px 1px 1px rgba(255,255,255,0.25);
+  margin: 1px 1px 0;
+}
+
+/* ── Pattern/Song mode toggle ───────────────────────────────────────────── */
+.pattern-mode-seg {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 99px;
+  border: 1px solid rgb(0 0 0 / 13%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+
+.pattern-mode-btn {
+  height: 30px;
+  padding: 1px 13px;
+  border-radius: 17px;
+  font: 500 13px/1 'Geist', 'Segoe UI', system-ui, 'Geist', 'Segoe UI', system-ui, sans-serif;
+  background: rgba(45,45,45,0.2);
+  color: rgba(255,255,255,0.75);
+  border: none;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 1px 0 rgba(0,0,0,0.27);
+  transition: color 0.1s;
+  white-space: nowrap;
+}
+
+.pattern-mode-btn.active {
+  background: linear-gradient(to bottom, #424242, black 78.8%, #343434);
+  border: 1px solid black;
+  color: white;
+  box-shadow: inset 1px 2px 2px 0 rgba(255,255,255,0.45);
+}
+
+
+/* ── Pattern tabs pill ──────────────────────────────────────────────────── */
+.pattern-tabs-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px;
+  border-radius: 99px;
+  border: 1px solid rgb(0 0 0 / 13%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+
+.pattern-tabs-scroll::-webkit-scrollbar { display: none; }
+
+.pattern-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 30px;
+  border-radius: 17px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: linear-gradient(to bottom, rgba(66,66,66,0.2), rgba(0,0,0,0.2) 78.8%, rgba(52,52,52,0.2));
+  box-shadow: inset 1px 1px 1px 0 rgba(0,0,0,0.27);
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  transition: opacity 0.1s;
+}
+
+.pattern-tab:hover {
+  opacity: 0.85;
+}
+
+.pattern-tab.active {
+  background: linear-gradient(to bottom, #424242, black 78.8%, #343434);
+  border-color: black;
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
+}
+
+.pattern-tab.playing::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--play-color);
+}
+
+.pattern-tab-name {
+  font: 600 10px/15px 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.5px;
+  color: white;
+  text-transform: uppercase;
+}
+
+/* ── Add pattern button ─────────────────────────────────────────────────── */
+.pattern-tab-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 30px;
+  border-radius: 17px;
+  border: 1px solid rgba(0,0,0,0.2);
+  background: linear-gradient(to bottom, rgba(66,66,66,0.2), rgba(0,0,0,0.2) 78.8%, rgba(52,52,52,0.2));
+  box-shadow: inset 1px 1px 1px 0 rgba(0,0,0,0.27);
+  color: white;
+  font: 600 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.1s;
+}
+
+.pattern-tab-add:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.pattern-tab-add:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Right side: Steps + sliders ────────────────────────────────────────── */
+.pattern-bar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.pb-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 120px;
+}
+
+.pb-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.pb-label {
+  font: 600 10px/15px 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.5);
+}
+
+.pb-value {
+  font: 600 10px/15px 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: white;
+}
+
+.pb-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #ff8002 var(--val, 50%), rgba(255,255,255,0.13) var(--val, 50%));
+  box-shadow: inset 0 1px 3px 0 black;
+  outline: none;
+  cursor: pointer;
+}
+
+.pb-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #ff8002 var(--val, 50%), rgba(255,255,255,0.13) var(--val, 50%));
+  box-shadow: inset 0 1px 3px 0 black;
+}
+
+.pb-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 21px;
+  border-radius: 2px;
+  margin-top: -6.5px;
+  background: linear-gradient(to bottom, #333, #111 50%, black);
+  border: 1px solid #444;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.pb-slider::-moz-range-thumb {
+  width: 16px;
+  height: 21px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #333, #111 50%, black);
+  border: 1px solid #444;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+/* ── Steps pill ─────────────────────────────────────────────────────────── */
+.steps-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 99px;
+  border: 1px solid rgb(0 0 0 / 13%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
+}
+
+.steps-pill-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 30px;
+  border-radius: 17px;
+  font: 500 13px/1 'Geist', 'Segoe UI', system-ui, 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: rgba(255,255,255,0.75);
+  white-space: nowrap;
+}
+
+.steps-pill-select-wrap {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.steps-select {
+  height: 30px;
+  padding: 1px 13px;
+  border-radius: 17px;
+  border: 1px solid black;
+  background: linear-gradient(to bottom, #424242, black 78.8%, #343434);
+  box-shadow: inset 1px 2px 2px 0 rgba(255,255,255,0.45);
+  color: white;
+  font: 400 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  cursor: pointer;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+
+/* ── Draggable tabs (song mode) ─────────────────────────────────────────── */
+.pattern-tab.draggable { cursor: grab; }
+.pattern-tab.draggable:active { cursor: grabbing; }
+
+/* ── Project name ───────────────────────────────────────────────────────── */
+.project-title-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.project-title {
+  font: 700 10px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  cursor: text;
+  padding: 3px 7px;
+  border-radius: 4px;
+  transition: color .12s, background .12s;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-title:hover { color: var(--text); background: var(--surface2); }
+
+.project-title-input {
+  font: 700 10px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  background: var(--surface2);
+  border: 1px solid var(--active);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 2px 7px;
+  outline: none;
+  width: 120px;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .pb-group {
+    width: 90px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pattern-bar {
+    padding: 0 12px;
+    gap: 8px;
+    height: auto;
+    min-height: 42px;
+    flex-wrap: wrap;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+}

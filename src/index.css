@@ -6,44 +6,30 @@
 }
 
 :root {
-  --bg: #2e2e2e;
-  --surface: #1c1c1c;
-  --surface2: #272729;
-  --border: #000000;
-  --active: #7d7d7d;
-  --active-dim: rgba(232, 124, 26, 0.25);
-  --playhead: #00bb46;
-  --playhead-dim: rgb(115 244 50 / 22%);
-  --text: #e0e0ee;
-  --text-dim: #888899;
-  --muted-color: #000000;
-  --danger: #ffffff;
-  --surface-alt: #343434;
-  --border-beat: #000000;
-  --header-border: rgba(255, 255, 255, 0.18);
+  --bg:            #343E1B;
+  --surface:       #0000006e;
+  --surface2:      #0000003d;
+  --surface-alt:   #282b22;
+  --border:        #373a2f;
+  --border-beat:   #454838;
+  --active:        #e8e5d0;
+  --active-dim:    rgba(232, 229, 208, 0.2);
+  --playhead:      #ffffff;
+  --playhead-dim:  rgba(255, 255, 255, 0.15);
+  --solo-color:    #8fb08a;
+  --mute-color:    #e04444;
+  --play-color:    #8fa84c;
+  --text:          #ffffffc9;
+  --text-dim:      #ffffff8a;
+  --muted-color:   #373a2f;
+  --danger:        #e04444;
+  --header-border: #373a2f;
+  --accent-orange: #c87a38;
 
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Geist', 'Segoe UI', system-ui, sans-serif;
   font-size: 13px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
-}
-
-[data-theme="light"] {
-  --bg: #f0f0f5;
-  --surface: #ffffff;
-  --surface2: #e8e8f0;
-  --surface-alt: #dddde8;
-  --border: #c8c8d8;
-  --border-beat: #9090a8;
-  --header-border: rgba(0, 0, 0, 0.12);
-  --active: #c86a10;
-  --active-dim: rgba(200, 106, 16, 0.2);
-  --playhead: #007a9e;
-  --playhead-dim: rgba(0, 122, 158, 0.18);
-  --text: #1a1a2e;
-  --text-dim: #5a5a6e;
-  --muted-color: #b8b8c8;
-  --danger: #cc2222;
 }
 
 html, body {
@@ -64,12 +50,12 @@ button {
   background: none;
   color: inherit;
   font: inherit;
-  touch-action: manipulation; /* eliminate 300ms tap delay */
+  touch-action: manipulation;
 }
 
 input[type="range"] {
   cursor: pointer;
-  accent-color: var(--active);
+  accent-color: var(--accent-orange);
   touch-action: manipulation;
 }
 

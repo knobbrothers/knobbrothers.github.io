@@ -1,59 +1,57 @@
 .transport {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 20px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.transport-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.transport-left {
-  display: flex;
-  align-items: center;
   gap: 16px;
+  height: 52px;
+  padding: 0 16px;
+  background: rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  margin: 1px 1px 0;
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.25);
 }
 
-.transport-right {
+/* ── Left: logo ─────────────────────────────────────────────────────────── */
+.transport-logo {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 16px;
 }
 
-/* ── Play/Stop ─────────────────────────────────────────────────────────── */
-.play-btn {
+.transport-logo-img {
+  height: 33px;
+  width: auto;
+  display: block;
+}
+
+/* ── Center: play + bpm ─────────────────────────────────────────────────── */
+.transport-center-box {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 7px 18px;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  min-width: 84px;
-  min-height: 36px;
-  border: 1px solid currentColor;
-  transition: opacity 0.15s, transform 0.08s;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-.play-btn.playing {
-  background: transparent;
-  color: var(--danger);
+/* ── Play / Stop ────────────────────────────────────────────────────────── */
+.play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 14px;
+  border-radius: 99px;
+  background: linear-gradient(to bottom, #424242, black 78.8%, #343434);
+  border: 1px solid black;
+  color: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: inset 1px 2px 2px 0 rgba(255, 255, 255, 0.45);
+  transition: opacity 0.12s, transform 0.08s;
+  align-self: stretch;
 }
 
-.play-btn.stopped {
-  background: transparent;
-  color: var(--text);
+.play-btn.playing {
+  color: var(--danger);
 }
 
 .play-btn:hover {
@@ -61,42 +59,58 @@
 }
 
 .play-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
 }
 
-/* ── Control group ─────────────────────────────────────────────────────── */
-.ctrl-group {
+/* ── BPM pill ───────────────────────────────────────────────────────────── */
+.t-bpm-pill {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 99px;
+  border: 1px solid rgb(0 0 0 / 13%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
 }
 
-.ctrl-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-dim);
+.t-bpm-label-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  height: 28px;
+  border-radius: 99px;
+}
+
+.t-label {
+  font: 500 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  color: rgba(255,255,255,0.9);
   white-space: nowrap;
+  letter-spacing: 0;
 }
 
-/* ── BPM ────────────────────────────────────────────────────────────────── */
-.bpm-divider {
-  color: var(--text-dim);
-  font-size: 14px;
+.t-bpm-value-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 13px;
+  height: 28px;
+  border-radius: 37px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
 }
 
 .bpm-input {
-  width: 44px;
+  width: 36px;
   background: transparent;
   border: none;
-  color: var(--active);
-  font: inherit;
-  font-size: 20px;
-  font-weight: 700;
-  text-align: left;
-  padding: 0;
+  color: rgba(255,255,255,0.9);
+  font: 400 13px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  text-align: center;
   -moz-appearance: textfield;
+  appearance: textfield;
+  padding: 0;
 }
 
 .bpm-input::-webkit-outer-spin-button,
@@ -106,162 +120,138 @@
 
 .bpm-input:focus {
   outline: none;
+  color: var(--active);
 }
 
-/* ── Swing ──────────────────────────────────────────────────────────────── */
-.ctrl-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  outline: none;
-  cursor: pointer;
+/* ── Right: action area ─────────────────────────────────────────────────── */
+.transport-actions {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+  position: relative;
 }
 
-.ctrl-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--active);
-  cursor: pointer;
-  transition: transform 0.1s;
+/* Outer toolbar pill groups all right-side buttons */
+.t-toolbar-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 99px;
+  border: 1px solid rgb(0 0 0 / 13%);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
 }
 
-.ctrl-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-.ctrl-slider.swing-slider { width: 80px; }
-
-.ctrl-value {
-  font-size: 11px;
-  color: var(--text-dim);
-  min-width: 28px;
-}
-
-/* ── Length buttons ─────────────────────────────────────────────────────── */
-.length-group { gap: 4px; }
-
-.length-btn {
-  width: 28px;
-  height: 26px;
+/* Text action buttons (FILES, etc.) */
+.t-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text-dim);
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 3px;
-  transition: background 0.1s, border-color 0.1s, color 0.1s;
-}
-
-.length-btn:hover:not(.active) {
-  border-color: var(--text-dim);
-  color: var(--text);
-}
-
-.length-btn.active {
-  background: var(--playhead);
-  border-color: var(--playhead);
-  color: #000;
-}
-
-/* ── Export slot ────────────────────────────────────────────────────────── */
-.transport-export {
-  display: flex;
-  align-items: center;
-}
-
-/* ── Playhead indicator row ────────────────────────────────────────────── */
-.playhead-row {
-  display: flex;
-  gap: 3px;
-  padding: 6px 0 4px;
-  /* Align pips with the step grid — offset by channel-label width + border */
-  padding-left: 181px;
-}
-
-.playhead-pip {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
-  transition: background 0.05s;
-}
-
-.playhead-pip.active {
-  background: var(--playhead);
-  box-shadow: 0 0 6px var(--playhead);
-}
-
-/* Beat markers: slightly taller every 4th pip */
-.playhead-pip.beat-start {
-  height: 6px;
-  margin-top: -1px;
-}
-
-/* ── Load Kit button ────────────────────────────────────────────────────── */
-.load-kit-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 4px;
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  gap: 5px;
+  padding: 5px 17px;
+  border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0.06));
+  color: rgba(255,255,255,0.5);
+  font: 600 10px/15px 'Geist', 'Segoe UI', system-ui, sans-serif;
   text-transform: uppercase;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text-dim);
-  transition: border-color 0.15s, color 0.15s, transform 0.08s;
-  flex-shrink: 0;
-  min-height: 36px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  box-shadow: inset 1px 1px 1px 0 rgba(255,255,255,0.25);
+  transition: color 0.12s;
+  white-space: nowrap;
+  align-self: stretch;
 }
 
-.load-kit-btn:hover {
-  border-color: var(--text-dim);
+.t-action-btn:hover {
+  color: rgba(255,255,255,0.85);
+}
+
+.t-action-btn.active {
+  color: var(--playhead);
+}
+
+.t-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Icon-only action buttons (Undo, Redo, Share) */
+.t-action-btn.t-icon-btn {
+  padding: 5px;
+  border: 1px solid rgba(0,0,0,0.25);
+  color: rgba(255,255,255,0.6);
+}
+
+.t-action-btn.t-icon-btn:hover {
+  color: rgba(255,255,255,0.9);
+}
+
+/* ── Dropdown menus ─────────────────────────────────────────────────────── */
+.t-dropdown-wrap {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.t-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 200;
+  min-width: 140px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 4px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.t-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-dim);
+  font: 600 11px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+
+.t-dropdown-item:hover {
+  background: var(--surface-alt);
   color: var(--text);
 }
 
-.load-kit-btn:active {
-  transform: scale(0.96);
+.t-submenu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 8px;
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .transport {
-    padding: 8px 10px 0;
-    gap: 6px;
-  }
-
-  .transport-controls {
+    padding: 0 12px;
+    height: auto;
+    min-height: 48px;
     flex-wrap: wrap;
+    padding-top: 6px;
+    padding-bottom: 6px;
     gap: 8px;
   }
 
-  .transport-right {
-    gap: 10px;
-  }
-
-  .length-group {
-    display: none;
-  }
-
-  .ctrl-slider.swing-slider {
-    width: 60px;
-  }
-
-  .play-btn {
-    padding: 7px 14px;
-    min-width: 72px;
-  }
-
-  .playhead-row {
-    padding-left: 121px;
+  .bpm-input {
+    width: 30px;
   }
 }

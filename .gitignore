@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local-only assets (font ships from Google Fonts CDN; zips are extracted archives)
+public/Geist/
+public/Geist.zip
+src/assets/Archive.zip

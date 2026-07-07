@@ -1,76 +1,96 @@
 .step-grid {
-  display: grid;
-  grid-template-columns: repeat(var(--step-count), 1fr);
-  gap: 3px;
-  /* Minimum button width of 22px × stepCount so grid never collapses to unusable size */
-  min-width: calc(var(--step-count) * 22px + (var(--step-count) - 1) * 3px);
+  display: flex;
+  gap: 12px;
+  height: 100%;
   width: 100%;
 }
 
-.step-btn {
-  height: 36px;
-  min-width: 0;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  transition: background 0.05s, border-color 0.05s, transform 0.06s;
-  position: relative;
-  /* Every 4th step gets a subtle left highlight to mark beats */
+.step-group {
+  display: flex;
+  gap: 5px;
+  flex: 1;
 }
 
-/* Corner dots via pseudo-element */
+.step-btn {
+  flex: 1;
+  height: 100%;
+  min-height: 60px;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.06s;
+  position: relative;
+
+  /* Inactive — default */
+  background: #00000030;
+  border: 1px solid #00000012;
+  box-shadow: none;
+}
+
+/* Alternate beat group — slightly different shade */
+.step-group-alt .step-btn {
+  background: #ffffff21;
+  border: 1px solid #00000012;
+}
+
+/* Active step — same across all beat groups */
+.step-btn.active {
+  background: #ffffff69;
+  border-color: #e8e5d0;
+}
+
+.step-btn.active::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(30, 32, 24, 0.5);
+  pointer-events: none;
+}
+
+
+/* Playhead top-bar pill */
 .step-btn::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle 2px at 4px 4px, var(--border) 100%, transparent 100%),
-    radial-gradient(circle 2px at calc(100% - 4px) 4px, var(--border) 100%, transparent 100%),
-    radial-gradient(circle 2px at 4px calc(100% - 4px), var(--border) 100%, transparent 100%),
-    radial-gradient(circle 2px at calc(100% - 4px) calc(100% - 4px), var(--border) 100%, transparent 100%);
+  top: 6px;
+  left: 13px;
+  right: 13px;
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
   pointer-events: none;
-  border-radius: inherit;
+  transition: background 0.05s;
 }
 
-.step-btn.active::before {
-  background:
-    radial-gradient(circle 2px at 4px 4px, rgba(255,255,255,0.3) 100%, transparent 100%),
-    radial-gradient(circle 2px at calc(100% - 4px) 4px, rgba(255,255,255,0.3) 100%, transparent 100%),
-    radial-gradient(circle 2px at 4px calc(100% - 4px), rgba(255,255,255,0.3) 100%, transparent 100%),
-    radial-gradient(circle 2px at calc(100% - 4px) calc(100% - 4px), rgba(255,255,255,0.3) 100%, transparent 100%);
+.step-btn.current::before {
+  background: rgba(255, 255, 255, 0.92);
 }
 
-/* Beat-group visual separator (every 4th step = new beat) */
-.step-btn.beat-start {
-  border-left-color: var(--border-beat);
+/* Hide bar when channel is muted / solo-silenced */
+.channel-row.is-muted .step-btn.current::before,
+.channel-row.is-solo-silenced .step-btn.current::before {
+  background: transparent;
 }
 
-/* Every other group of 4 steps is slightly brighter */
-.step-btn.beat-group-alt {
-  background: var(--surface-alt);
+/* Current step (playhead) on inactive step */
+.step-btn.current:not(.active) {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Active (step is ON) */
-.step-btn.active {
-  background: var(--ch-color, var(--active));
-  border-color: var(--ch-color, var(--active));
-}
-
-/* Current step (playhead is here) */
-.step-btn.current {
-  background: var(--playhead-dim);
-  border-color: var(--playhead);
-}
-
-/* Active + current — show both: playhead wins bg, keep active glow */
+/* Active + current — inherit active bg, white top bar from ::before */
 .step-btn.active.current {
-  background: var(--playhead);
-  border-color: var(--playhead);
-  box-shadow: inset 0 0 0 2px var(--ch-color, var(--active));
+  background: #e8e5d0;
+  box-shadow: 0 0 12px rgba(232, 229, 208, 0.4);
 }
 
 .step-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.93);
 }
 
 .step-btn:focus-visible {
@@ -78,13 +98,72 @@
   outline-offset: 1px;
 }
 
+/* Muted / solo-silenced */
+.channel-row.is-muted .step-btn.active,
+.channel-row.is-solo-silenced .step-btn.active {
+  background: #2a2d22;
+  border-color: #3a3d30;
+  box-shadow: none;
+}
+
+
+
+/* ── Roll badge ─────────────────────────────────────────────────────────── */
+.roll-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 700 8px/1 monospace;
+  color: var(--accent-orange);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Roll context menu ──────────────────────────────────────────────────── */
+.roll-menu {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+}
+
+.roll-menu-btn {
+  font: 700 11px/1 monospace;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.roll-menu-btn:hover {
+  color: var(--text);
+  border-color: var(--text-dim);
+}
+
+.roll-menu-btn.active {
+  color: var(--active);
+  border-color: var(--active);
+}
+
 @media (max-width: 768px) {
   .step-btn {
-    height: 32px;
-    border-radius: 3px;
+    min-height: 48px;
   }
 
   .step-grid {
-    gap: 2px;
+    gap: 8px;
+  }
+
+  .step-group {
+    gap: 3px;
   }
 }
