@@ -16,6 +16,11 @@ export default function HelpModal({ onClose }) {
           </section>
 
           <section className="help-section">
+            <h3>File menu</h3>
+            <p>Use the <strong>File</strong> menu to manage projects: <strong>New</strong> starts a fresh project, <strong>Save</strong> downloads your project as a .sq32 file, <strong>Load</strong> opens a saved .sq32, and <strong>Export MP3…</strong> renders your beat to audio.</p>
+          </section>
+
+          <section className="help-section">
             <h3>Keyboard shortcuts</h3>
             <ul>
               <li><kbd>Space</kbd> — Play / Stop</li>

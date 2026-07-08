@@ -145,7 +145,6 @@
 /* ── Responsive ────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .steps-row {
-    margin: 4px 12px 0;
     padding: 0 8px;
   }
 

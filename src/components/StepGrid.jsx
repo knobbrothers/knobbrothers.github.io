@@ -54,7 +54,6 @@ function StepGridInner({ channel, currentStep, onToggleStep, onSetRoll }) {
             {steps.map((active, j) => {
               const i         = startIndex + j
               const isCurrent = i === currentStep
-              const rollVal   = roll[i] ?? 1
               const classes   = [
                 'step-btn',
                 active    ? 'active'  : '',
@@ -77,11 +76,7 @@ function StepGridInner({ channel, currentStep, onToggleStep, onSetRoll }) {
                   draggable={false}
                   aria-label={`Step ${i + 1} ${active ? 'on' : 'off'}`}
                   aria-pressed={active}
-                >
-                  {rollVal > 1 && (
-                    <span className="roll-badge" aria-hidden="true">×{rollVal}</span>
-                  )}
-                </button>
+                />
               )
             })}
           </div>

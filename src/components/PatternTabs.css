@@ -137,7 +137,17 @@
 
 /* ── Right side: Steps + sliders ────────────────────────────────────────── */
 .pattern-bar-right {
-  margin-left: auto;
+  /* Take the remaining row width so Steps can sit at the left edge of this
+     section while Master + Swing are pushed to the right edge. */
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pb-right-group {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -305,12 +315,23 @@
 
 @media (max-width: 768px) {
   .pattern-bar {
-    padding: 0 12px;
+    padding: 12px 12px;
     gap: 8px;
     height: auto;
     min-height: 42px;
     flex-wrap: wrap;
-    padding-top: 4px;
-    padding-bottom: 4px;
+  }
+
+  /* Un-nest so Steps and Master+Swing become direct flex children of
+     .pattern-bar, sharing its wrap flow with the tabs strip instead of
+     fighting it as one flex:1 box (that's what stretched the gap before
+     Steps). Master+Swing still gets forced to its own line below. */
+  .pattern-bar-right {
+    display: contents;
+  }
+
+  .pb-right-group {
+    flex-basis: 100%;
+    justify-content: flex-start;
   }
 }

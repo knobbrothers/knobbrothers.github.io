@@ -78,30 +78,9 @@
   border-color: var(--danger);
 }
 
-/* ── Mini step grid ─────────────────────────────────────────────────────── */
-.pc-grid {
-  display: flex;
-  gap: 8px;
-}
-
-.pc-group {
-  display: flex;
-  gap: 3px;
-  flex: 1;
-}
-
-.pc-step {
-  flex: 1;
-  height: 18px;
-  border-radius: 3px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  transition: background 0.1s;
-}
-
-.pc-step.active {
-  background: var(--active);
-  border-color: var(--active);
+/* ── Drag-to-reorder ────────────────────────────────────────────────────── */
+.pattern-card.dragging {
+  opacity: 0.5;
 }
 
 /* ── Playing badge ──────────────────────────────────────────────────────── */

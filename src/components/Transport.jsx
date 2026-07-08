@@ -6,7 +6,6 @@ import './Transport.css'
 export function Transport({
   onSave,
   onLoad,
-  onShare,
   onHelp,
   onUndo,
   onRedo,
@@ -19,6 +18,7 @@ export function Transport({
   const loadInputRef = useRef(null)
   const [fileMenuOpen, setFileMenuOpen] = useState(false)
   const [exportOpen, setExportOpen]     = useState(false)
+  const [barsMenuOpen, setBarsMenuOpen] = useState(false)
 
   return (
     <div className="transport">
@@ -39,10 +39,10 @@ export function Transport({
           }}
         />
 
-        <div className="t-toolbar-pill">
+        <div className="t-toolbar-pill desktop-toolbar">
           {/* FILE menu */}
           <DropdownMenu
-            label="FILES"
+            label="File"
             open={fileMenuOpen}
             onToggle={() => setFileMenuOpen(v => !v)}
             onClose={() => setFileMenuOpen(false)}
@@ -76,7 +76,7 @@ export function Transport({
             title="Undo (Cmd+Z)"
             aria-label="Undo"
           >
-            <UndoIcon />
+            <i className="fa-solid fa-arrow-rotate-left" aria-hidden="true" />
           </button>
           <button
             className="t-action-btn t-icon-btn"
@@ -85,17 +85,7 @@ export function Transport({
             title="Redo (Cmd+Shift+Z)"
             aria-label="Redo"
           >
-            <RedoIcon />
-          </button>
-
-          {/* Share */}
-          <button
-            className="t-action-btn t-icon-btn"
-            onClick={onShare}
-            title="Copy shareable link"
-            aria-label="Share pattern link"
-          >
-            <ShareIcon />
+            <i className="fa-solid fa-arrow-rotate-right" aria-hidden="true" />
           </button>
 
           {/* Help */}
@@ -104,7 +94,62 @@ export function Transport({
             onClick={onHelp}
             title="Help"
             aria-label="Help"
-          >?</button>
+          >
+            <i className="fa-solid fa-question" aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Collapsed toolbar (≤768px) — same actions behind a single bars icon */}
+        <div className="t-toolbar-collapsed">
+          <DropdownMenu
+            label={<i className="fa-solid fa-bars" aria-hidden="true" />}
+            open={barsMenuOpen}
+            onToggle={() => setBarsMenuOpen(v => !v)}
+            onClose={() => setBarsMenuOpen(false)}
+            triggerClassName="t-action-btn t-icon-btn"
+            ariaLabel="Menu"
+          >
+            <button
+              className="t-dropdown-item"
+              onClick={() => { setBarsMenuOpen(false); onNew() }}
+            >
+              <NewIcon /> New
+            </button>
+            <button className="t-dropdown-item" onClick={() => { onSave(); setBarsMenuOpen(false) }}>
+              <SaveIcon /> Save
+            </button>
+            <button className="t-dropdown-item" onClick={() => { loadInputRef.current?.click(); setBarsMenuOpen(false) }}>
+              <FolderIcon /> Load
+            </button>
+            <button
+              className="t-dropdown-item"
+              onClick={() => { setExportOpen(true); setBarsMenuOpen(false) }}
+            >
+              <DownloadIcon /> Export MP3…
+            </button>
+            <div className="t-submenu-sep" />
+            <button
+              className="t-dropdown-item"
+              onClick={() => { onUndo(); setBarsMenuOpen(false) }}
+              disabled={!canUndo}
+            >
+              <i className="fa-solid fa-arrow-rotate-left" aria-hidden="true" /> Undo
+            </button>
+            <button
+              className="t-dropdown-item"
+              onClick={() => { onRedo(); setBarsMenuOpen(false) }}
+              disabled={!canRedo}
+            >
+              <i className="fa-solid fa-arrow-rotate-right" aria-hidden="true" /> Redo
+            </button>
+            <div className="t-submenu-sep" />
+            <button
+              className="t-dropdown-item"
+              onClick={() => { onHelp(); setBarsMenuOpen(false) }}
+            >
+              <i className="fa-solid fa-question" aria-hidden="true" /> Help
+            </button>
+          </DropdownMenu>
         </div>
 
         <ExportPanel
@@ -120,7 +165,7 @@ export function Transport({
 
 // ─── Dropdown menu helper ───────────────────────────────────────────────────
 
-function DropdownMenu({ label, open, onToggle, onClose, children }) {
+function DropdownMenu({ label, open, onToggle, onClose, children, triggerClassName, ariaLabel }) {
   const ref = useRef(null)
 
   useEffect(() => {
@@ -135,8 +180,10 @@ function DropdownMenu({ label, open, onToggle, onClose, children }) {
   return (
     <div ref={ref} className="t-dropdown-wrap">
       <button
-        className={`t-action-btn${open ? ' active' : ''}`}
+        className={`${triggerClassName ?? 't-action-btn'}${open ? ' active' : ''}`}
         onClick={onToggle}
+        aria-label={ariaLabel}
+        title={ariaLabel}
       >
         {label}
       </button>
@@ -165,36 +212,6 @@ function FolderIcon() {
   return (
     <svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1.5 1.5H10.5C11.33 3.5 12 4.17 12 5v4.5C12 10.33 11.33 11 10.5 11h-8C1.67 11 1 10.33 1 9.5V3.5z"/>
-    </svg>
-  )
-}
-
-function UndoIcon() {
-  return (
-    <svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M1 4h6a4 4 0 0 1 0 8H4"/>
-      <polyline points="1 1 1 4 4 4"/>
-    </svg>
-  )
-}
-
-function RedoIcon() {
-  return (
-    <svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 4H6a4 4 0 0 0 0 8h3"/>
-      <polyline points="12 1 12 4 9 4"/>
-    </svg>
-  )
-}
-
-function ShareIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="10" cy="2.5" r="1.5"/>
-      <circle cx="2.5" cy="6.5" r="1.5"/>
-      <circle cx="10" cy="10.5" r="1.5"/>
-      <line x1="4" y1="5.5" x2="8.5" y2="3.5"/>
-      <line x1="4" y1="7.5" x2="8.5" y2="9.5"/>
     </svg>
   )
 }

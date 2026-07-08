@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import './PatternTabs.css'
 
 export function PatternTabs({
@@ -6,7 +6,6 @@ export function PatternTabs({
   currentIdx,
   onSelect,
   songMode,
-  onReorder,
   onToggleSongMode,
   playingPatternIdx,
   playing,
@@ -21,7 +20,6 @@ export function PatternTabs({
   onSetSwing,
   onAddPattern,
 }) {
-  const dragSrc = useRef(null)
   const [bpmDraft, setBpmDraft] = useState(null)
 
   function handleBpmFocus() {
@@ -66,6 +64,8 @@ export function PatternTabs({
           <div className="t-bpm-value-pill">
             <input
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               className="bpm-input"
               min={60}
               max={200}
@@ -92,9 +92,13 @@ export function PatternTabs({
         >Song</button>
       </div>
 
-      {/* Pattern tabs */}
+      {/* Pattern tabs — always name-sorted (A–D) and fixed; the song-view cards
+          own the arrangement/playback order, so tabs never reorder. */}
       <div className="pattern-tabs-scroll">
-        {patterns.map((p, i) => {
+        {patterns
+          .map((p, i) => ({ p, i }))
+          .sort((a, b) => a.p.name.localeCompare(b.p.name))
+          .map(({ p, i }) => {
           const isPlaying = songMode && playing && i === playingPatternIdx
           return (
             <div
@@ -103,19 +107,8 @@ export function PatternTabs({
                 'pattern-tab',
                 i === currentIdx ? 'active' : '',
                 isPlaying        ? 'playing' : '',
-                songMode         ? 'draggable' : '',
               ].filter(Boolean).join(' ')}
               onClick={() => onSelect(i)}
-              draggable={songMode}
-              onDragStart={() => { dragSrc.current = i }}
-              onDragOver={e => { if (songMode) e.preventDefault() }}
-              onDrop={e => {
-                e.preventDefault()
-                if (songMode && dragSrc.current !== null && dragSrc.current !== i) {
-                  onReorder(dragSrc.current, i)
-                  dragSrc.current = null
-                }
-              }}
             >
               <span className="pattern-tab-name">{p.name}</span>
             </div>
@@ -144,45 +137,47 @@ export function PatternTabs({
               value={stepCount}
               onChange={e => onSetStepCount(Number(e.target.value))}
             >
-              {[...new Set([12, 16, 24, 32, stepCount])]
+              {[...new Set([16, 32, stepCount])]
                 .sort((a, b) => a - b)
                 .map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </div>
         </div>
 
-        <div className="pb-group">
-          <div className="pb-info">
-            <span className="pb-label">Master</span>
-            <span className="pb-value">{Math.round((masterVolume ?? 1) * 100)}</span>
+        <div className="pb-right-group">
+          <div className="pb-group">
+            <div className="pb-info">
+              <span className="pb-label">Master</span>
+              <span className="pb-value">{Math.round((masterVolume ?? 1) * 100)}</span>
+            </div>
+            <input
+              type="range"
+              className="pb-slider"
+              style={{ '--val': `${Math.round((masterVolume ?? 1) * 100)}%` }}
+              min={0}
+              max={100}
+              value={Math.round((masterVolume ?? 1) * 100)}
+              onChange={e => onSetMasterVolume(Number(e.target.value) / 100)}
+              aria-label="Master volume"
+            />
           </div>
-          <input
-            type="range"
-            className="pb-slider"
-            style={{ '--val': `${Math.round((masterVolume ?? 1) * 100)}%` }}
-            min={0}
-            max={100}
-            value={Math.round((masterVolume ?? 1) * 100)}
-            onChange={e => onSetMasterVolume(Number(e.target.value) / 100)}
-            aria-label="Master volume"
-          />
-        </div>
 
-        <div className="pb-group">
-          <div className="pb-info">
-            <span className="pb-label">Swing</span>
-            <span className="pb-value">{Math.round(swing * 100)}%</span>
+          <div className="pb-group">
+            <div className="pb-info">
+              <span className="pb-label">Swing</span>
+              <span className="pb-value">{Math.round(swing * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              className="pb-slider"
+              style={{ '--val': `${Math.round(swing * 100)}%` }}
+              min={0}
+              max={100}
+              value={Math.round(swing * 100)}
+              onChange={e => onSetSwing(Number(e.target.value) / 100)}
+              aria-label="Global swing"
+            />
           </div>
-          <input
-            type="range"
-            className="pb-slider"
-            style={{ '--val': `${Math.round(swing * 100)}%` }}
-            min={0}
-            max={100}
-            value={Math.round(swing * 100)}
-            onChange={e => onSetSwing(Number(e.target.value) / 100)}
-            aria-label="Global swing"
-          />
         </div>
       </div>
     </div>

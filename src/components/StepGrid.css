@@ -3,6 +3,8 @@
   gap: 12px;
   height: 100%;
   width: 100%;
+  /* Grow to content width when steps hit their 24px floor so the card scrolls */
+  min-width: max-content;
 }
 
 .step-group {
@@ -15,6 +17,7 @@
   flex: 1;
   height: 100%;
   min-height: 60px;
+  min-width: 24px;
   border-radius: 5px;
   overflow: hidden;
   cursor: pointer;
@@ -36,7 +39,7 @@
 /* Active step — same across all beat groups */
 .step-btn.active {
   background: #ffffff69;
-  border-color: #e8e5d0;
+  border-color: transparent;
 }
 
 .step-btn.active::after {
@@ -52,35 +55,10 @@
   pointer-events: none;
 }
 
-
-/* Playhead top-bar pill */
-.step-btn::before {
-  content: '';
-  position: absolute;
-  top: 6px;
-  left: 13px;
-  right: 13px;
-  height: 6px;
-  border-radius: 999px;
-  background: transparent;
-  pointer-events: none;
-  transition: background 0.05s;
-}
-
-.step-btn.current::before {
-  background: rgba(255, 255, 255, 0.92);
-}
-
-/* Hide bar when channel is muted / solo-silenced */
-.channel-row.is-muted .step-btn.current::before,
-.channel-row.is-solo-silenced .step-btn.current::before {
-  background: transparent;
-}
-
 /* Current step (playhead) on inactive step */
 .step-btn.current:not(.active) {
   background: rgba(0, 0, 0, 0.5);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: transparent;
 }
 
 /* Active + current — inherit active bg, white top bar from ::before */
@@ -107,18 +85,6 @@
 }
 
 
-
-/* ── Roll badge ─────────────────────────────────────────────────────────── */
-.roll-badge {
-  position: absolute;
-  bottom: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font: 700 8px/1 monospace;
-  color: var(--accent-orange);
-  pointer-events: none;
-  white-space: nowrap;
-}
 
 /* ── Roll context menu ──────────────────────────────────────────────────── */
 .roll-menu {

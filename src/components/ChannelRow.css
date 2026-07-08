@@ -64,9 +64,15 @@
   transition: color 0.12s, border-color 0.12s;
 }
 
+/* FA mute icon needs a touch more size than the 'S' solo glyph */
+.mute-btn {
+  font-size: 13px;
+}
+
 .ch-icon-btn--lg {
   width: 36px;
   height: 36px;
+  font-size: 14px;
   background: linear-gradient(to bottom, rgba(255,255,255,0.01), rgba(255,255,255,0.03));
   border: 0.35px solid rgba(0,0,0,0.15);
 }
@@ -83,9 +89,9 @@
 }
 
 .ch-icon-btn.muted {
-  color: var(--mute-color);
-  border-color: var(--mute-color);
-  background: rgba(224, 68, 68, 0.1);
+  color: #fff;
+  background: #950000;
+  border-color: transparent;
 }
 
 .ch-icon-btn.danger:hover {
@@ -139,11 +145,11 @@
   right: 0;
   z-index: 300;
   min-width: 130px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 7px;
   padding: 4px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
 }
 
 .ch-ctx-item {
@@ -165,8 +171,8 @@
 }
 
 .ch-ctx-item:hover {
-  background: var(--surface-alt);
-  color: var(--text);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
 .ch-ctx-item.danger:hover {
@@ -185,7 +191,8 @@
   height: 100%;
   padding: 8px;
   display: flex;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   background: rgba(255,255,255,0.08);
 }
 
@@ -193,10 +200,10 @@
 .ch-expand-bar {
   width: 100%;
   background: #1b1d1840;
-  font: 600 8px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
+  font: 600 10px/1 'Geist', 'Segoe UI', system-ui, sans-serif;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--text);
+  color: #848484a1;
   text-align: center;
   cursor: pointer;
   flex-shrink: 0;
@@ -231,6 +238,9 @@
   border-top: 1px solid #ffffff33;
   display: flex;
   flex-direction: column;
+  /* Scroll horizontally (like the step grid) when 24px-min cells exceed the width */
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .ch-subrow {
@@ -258,6 +268,7 @@
   flex: 1;
   display: flex;
   gap: 12px;
+  min-width: max-content;
 }
 
 .ch-subrow-group {
@@ -268,20 +279,40 @@
 
 .ch-subrow-cell {
   flex: 1;
+  min-width: 24px;
   display: flex;
   align-items: end;
   justify-content: center;
-  font: 600 9px/1 monospace;
+  font: 600 11px/1 monospace;
   color: var(--text);
   background: var(--surface);
   border-bottom: 1px solid #ffffff45;
   border-radius: 4px;
   cursor: ns-resize;
   user-select: none;
+  /* Claim the touch gesture so a vertical value-drag never scrolls the page.
+     Scoped to the cell only — the rest of the page scrolls normally. */
+  touch-action: none;
   transition: border-color 0.1s;
-  min-width: 0;
-  height: 32px;
-  padding-bottom: 2px;
+  height: 44px;
+  padding-bottom: 6px;
+}
+
+/* Floating value readout shown while dragging (portaled to <body>) */
+.ch-drag-bubble {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  margin-top: -6px;
+  z-index: 9999;
+  pointer-events: none;
+  background: #000;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  padding: 4px 7px;
+  font: 600 11px/1 monospace;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 .ch-subrow-cell:hover {
@@ -298,23 +329,32 @@
   color: var(--active);
 }
 
-/* Roll cells cycle on click */
+/* Roll cells cycle on click — compact, label-like, centered value.
+   Text color matches VEL/PROB (white) in every state, including when set. */
 .ch-subrow-cell.roll-cell {
   cursor: pointer;
-  color: var(--text-dim);
+  color: var(--text);
+  height: 24px;
+  align-items: center;
+  padding-bottom: 0;
 }
 
 .ch-subrow-cell.roll-cell.active-roll {
-  color: var(--accent-orange);
   border-color: var(--accent-orange);
+}
+
+/* .inactive is defined earlier but has equal specificity to .roll-cell, which would
+   otherwise win by source order — restate the dim color so inactive roll cells still dim. */
+.ch-subrow-cell.roll-cell.inactive {
+  color: var(--text-dim);
 }
 
 /* ── Bottom controls bar ─────────────────────────────────────────────────── */
 .ch-controls-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 48px;
+  justify-content: flex-start;
+  gap: 32px;
   padding: 8px 16px;
   background: rgba(255,255,255,0.05);
   border-top: 1px solid rgba(255,255,255,0.25);
@@ -379,6 +419,7 @@
   gap: 16px;
   align-items: center;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .ch-ctrl-pill-btn {
@@ -424,5 +465,19 @@
 
   .ch-ctrl-slider {
     width: 60px;
+  }
+
+  /* Bigger touch target for the vertical value-drag cells (ROLL stays 24px) */
+  .ch-subrow-cell {
+    height: 48px;
+  }
+
+  /* Match the step grid's mobile gaps so sub-cell columns stay aligned */
+  .ch-subrow-steps {
+    gap: 8px;
+  }
+
+  .ch-subrow-group {
+    gap: 3px;
   }
 }

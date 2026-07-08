@@ -2,7 +2,7 @@ import { useReducer, useCallback } from 'react'
 
 // ─── Channel factory ────────────────────────────────────────────────────────
 
-let _nextChannelId = 12  // starts after the 12 default channels (ids 0–11)
+let _nextChannelId = 0  // reassigned to DEFAULT_CHANNELS.length once the kit is built
 
 function makeChannel(id, name, sample, volume = 0.8, stepCount = 16) {
   return {
@@ -24,19 +24,15 @@ function makeChannel(id, name, sample, volume = 0.8, stepCount = 16) {
 const STEP_COUNT = 16
 
 const DEFAULT_CHANNELS = [
-  { name: 'Kick',         sample: 'kick.wav',         volume: 0.85 },
-  { name: 'Snare',        sample: 'snap.wav',         volume: 0.80 },
-  { name: 'Hi-Hat Cl.',   sample: 'hihat-closed.wav', volume: 0.75 },
-  { name: 'Hi-Hat Op.',   sample: 'hihat-open.wav',   volume: 0.70 },
-  { name: 'Hi-Hat Op. 2', sample: 'hihat-open-2.wav', volume: 0.65 },
-  { name: 'Clap',         sample: 'clap.wav',         volume: 0.80 },
-  { name: 'Tambourine',   sample: 'tambourine.wav',   volume: 0.65 },
-  { name: 'Perc 1',       sample: 'perc-1.wav',       volume: 0.75 },
-  { name: 'Perc 2',       sample: 'perc-2.wav',       volume: 0.70 },
-  { name: 'Bass',         sample: 'bass.wav',         volume: 0.80 },
-  { name: 'Chord',        sample: 'chord.wav',        volume: 0.70 },
-  { name: 'FX',           sample: 'fx.wav',           volume: 0.65 },
+  { name: 'Kick',       sample: 'kick.wav',         volume: 0.85 },
+  { name: 'Snap',       sample: 'snap.wav',         volume: 0.80 },
+  { name: 'Hi-Hat Cl.', sample: 'hihat-closed.wav', volume: 0.75 },
+  { name: 'Hi-Hat Op.', sample: 'hihat-open.wav',   volume: 0.70 },
+  { name: 'Clap',       sample: 'clap.wav',         volume: 0.80 },
 ].map((ch, i) => makeChannel(i, ch.name, ch.sample, ch.volume, STEP_COUNT))
+
+// Channel ids start after the default kit (ids 0…N-1)
+_nextChannelId = DEFAULT_CHANNELS.length
 
 // Global channel fields — changes propagate to ALL patterns
 const GLOBAL_CHANNEL_FIELDS = ['sample', 'name', 'volume', 'pan', 'swing']
@@ -44,6 +40,15 @@ const GLOBAL_CHANNEL_FIELDS = ['sample', 'name', 'volume', 'pan', 'swing']
 // ─── Pattern factory ────────────────────────────────────────────────────────
 
 let _nextPatternId = 1  // starts at 1 since only pattern A (id 0) is pre-allocated
+
+const PATTERN_NAMES = ['A', 'B', 'C', 'D']
+
+// Names are always a non-repeating subset of A–D: pick the lowest free letter
+// so deleting A and adding again reuses "A" instead of duplicating a name.
+export function nextPatternName(patterns) {
+  const used = new Set(patterns.map(p => p.name))
+  return PATTERN_NAMES.find(n => !used.has(n)) ?? `P${patterns.length + 1}`
+}
 
 function makePattern(id, name, channels, stepCount = STEP_COUNT, bpm = 120, swing = 0) {
   return { id, name, channels, stepCount, bpm, swing }
@@ -116,8 +121,17 @@ function reducer(state, action) {
         channels: current(state).channels.map(ch => {
           if (ch.id !== channelId) return ch
           const steps = [...ch.steps]
+          const turningOff = steps[stepIndex]
           steps[stepIndex] = !steps[stepIndex]
-          return { ...ch, steps }
+          if (!turningOff) return { ...ch, steps }
+          // Deactivating a step resets its per-step values so re-activating starts clean.
+          const velocity    = [...ch.velocity]
+          const probability = [...(ch.probability ?? ch.steps.map(() => 100))]
+          const roll        = [...(ch.roll ?? ch.steps.map(() => 1))]
+          velocity[stepIndex]    = 100
+          probability[stepIndex] = 100
+          roll[stepIndex]        = 1
+          return { ...ch, steps, velocity, probability, roll }
         }),
       })
     }
@@ -189,7 +203,7 @@ function reducer(state, action) {
       if (current(state).channels.length >= 12) return state
       const newId  = _nextChannelId++
       const name   = action.name   ?? 'Channel'
-      const sample = action.sample ?? 'kick.wav'
+      const sample = action.sample ?? ''   // clean channel — no sample until user assigns one
       const volume = action.volume ?? 0.8
       return {
         ...state,
@@ -337,11 +351,19 @@ function reducer(state, action) {
       const patterns = [...state.patterns]
       const [moved] = patterns.splice(fromIdx, 1)
       patterns.splice(toIdx, 0, moved)
-      let next = state.currentPatternIdx
-      if (fromIdx === next) next = toIdx
-      else if (fromIdx < next && toIdx >= next) next--
-      else if (fromIdx > next && toIdx <= next) next++
-      return { ...state, patterns, currentPatternIdx: next }
+      // Keep an index tracking the same pattern object after the splice.
+      const track = (idx) => {
+        if (fromIdx === idx) return toIdx
+        if (fromIdx < idx && toIdx >= idx) return idx - 1
+        if (fromIdx > idx && toIdx <= idx) return idx + 1
+        return idx
+      }
+      return {
+        ...state,
+        patterns,
+        currentPatternIdx: track(state.currentPatternIdx),
+        playingPatternIdx: track(state.playingPatternIdx),
+      }
     }
 
     // ── Backing tracks (global, not snapshotted in undo history) ─────────
@@ -376,9 +398,8 @@ function reducer(state, action) {
 
     case 'ADD_PATTERN': {
       if (state.patterns.length >= 4) return state
-      const NAMES = ['A', 'B', 'C', 'D']
       const newId   = _nextPatternId++
-      const newName = NAMES[state.patterns.length] ?? `P${newId}`
+      const newName = nextPatternName(state.patterns)
       // Copy channel structure from first pattern (names, samples, volume, pan, swing; blank steps)
       const templateChannels = state.patterns[0]?.channels ?? []
       const channels = templateChannels.map(ch =>
@@ -419,13 +440,22 @@ function reducer(state, action) {
 
       // New format: has patterns array
       if (Array.isArray(data.patterns)) {
-        _nextChannelId = Math.max(...data.patterns.map(p => p.channels.length), 6)
-        const NAMES = ['A', 'B', 'C', 'D']
-        // Load up to 4 patterns; dynamic count (no forced padding)
-        const patterns = data.patterns.slice(0, 4).map((p, i) => ({
+        _nextChannelId = Math.max(...data.patterns.map(p => p.channels.length), 0)
+        // Load up to 4 patterns; keep the saved order (the arrangement). Keep a
+        // saved name only if it's a valid, not-yet-used letter — otherwise assign
+        // the lowest free letter. This preserves intentional gaps (e.g. B,C,D)
+        // while guaranteeing names never repeat, even for old/corrupt saves.
+        const usedNames = new Set()
+        const patterns = data.patterns.slice(0, 4).map((p, i) => {
+          let name = p.name
+          if (!PATTERN_NAMES.includes(name) || usedNames.has(name)) {
+            name = PATTERN_NAMES.find(n => !usedNames.has(n)) ?? `P${i + 1}`
+          }
+          usedNames.add(name)
+          return {
           ...p,
           id: i,
-          name: NAMES[i] ?? p.name,
+          name,
           channels: p.channels.map((ch, ci) => ({
             ...makeChannel(ci, ch.name, ch.sample, ch.volume ?? 0.8, p.stepCount ?? STEP_COUNT),
             pan:         ch.pan         ?? 0,
@@ -436,7 +466,8 @@ function reducer(state, action) {
             probability: ch.probability ?? Array(p.stepCount ?? STEP_COUNT).fill(100),
             roll:        ch.roll        ?? Array(p.stepCount ?? STEP_COUNT).fill(1),
           })),
-        }))
+          }
+        })
         _nextPatternId = patterns.length
         return {
           ...state,

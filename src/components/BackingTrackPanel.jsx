@@ -81,7 +81,7 @@ export function BackingTrackPanel({
               title="Remove backing track"
               aria-label={`Remove ${track.name}`}
             >
-              ×
+              <i className="fa-solid fa-trash" aria-hidden="true" />
             </button>
           </div>
         ))}

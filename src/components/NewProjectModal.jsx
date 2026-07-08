@@ -9,7 +9,7 @@ export function NewProjectModal({ onConfirm, onCancel }) {
   function handleSubmit(e) {
     e.preventDefault()
     const kit = kitId === 'empty' ? { channels: [] } : null
-    onConfirm({ name: name.trim() || 'My First Loop', stepCount, kit })
+    onConfirm({ name: name.trim() || 'Untitled', stepCount, kit })
   }
 
   return (
@@ -21,7 +21,7 @@ export function NewProjectModal({ onConfirm, onCancel }) {
           <input
             className="npm-input"
             type="text"
-            placeholder="My First Loop"
+            placeholder="Name"
             value={name}
             onChange={e => setName(e.target.value)}
             maxLength={64}
@@ -31,7 +31,7 @@ export function NewProjectModal({ onConfirm, onCancel }) {
         <label className="npm-label">
           Steps
           <select className="npm-select" value={stepCount} onChange={e => setStepCount(Number(e.target.value))}>
-            {[4, 8, 16, 32].map(n => <option key={n} value={n}>{n}</option>)}
+            {[16, 32].map(n => <option key={n} value={n}>{n}</option>)}
           </select>
         </label>
         <label className="npm-label">

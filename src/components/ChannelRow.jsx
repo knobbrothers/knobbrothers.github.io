@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { StepGrid } from './StepGrid'
 import './ChannelRow.css'
 
@@ -117,7 +118,7 @@ export function ChannelRow({
           aria-label={channel.muted ? 'Unmute channel' : 'Mute channel'}
           aria-pressed={channel.muted}
         >
-          {channel.muted ? <MuteOnIcon /> : <MuteOffIcon />}
+          <i className="fa-solid fa-volume-xmark" aria-hidden="true" />
         </button>
 
         {/* Channel name */}
@@ -143,17 +144,7 @@ export function ChannelRow({
             title={isExpanded ? 'Collapse' : 'Expand'}
             aria-label={isExpanded ? 'Collapse channel' : 'Expand channel'}
           >
-            <ExpandIcon />
-          </button>
-
-          {/* Delete — direct action */}
-          <button
-            className="ch-icon-btn ch-icon-btn--lg"
-            onClick={() => onRemoveChannel(channel.id)}
-            title="Delete channel"
-            aria-label="Delete channel"
-          >
-            <TrashIcon />
+            <i className="fa-solid fa-chart-simple" aria-hidden="true" />
           </button>
 
           {/* Context menu */}
@@ -164,7 +155,7 @@ export function ChannelRow({
               title="More options"
               aria-label="Channel options"
             >
-              <DotsIcon />
+              <i className="fa-solid fa-ellipsis-vertical" aria-hidden="true" />
             </button>
             {ctxOpen && (
               <div className="ch-ctx-menu">
@@ -186,6 +177,10 @@ export function ChannelRow({
                 <div className="ch-ctx-sep" />
                 <button className="ch-ctx-item" onClick={() => { fileInputRef.current?.click(); setCtxOpen(false) }}>
                   <UploadIcon /> Upload Sample
+                </button>
+                <div className="ch-ctx-sep" />
+                <button className="ch-ctx-item danger" onClick={() => { onRemoveChannel(channel.id); setCtxOpen(false) }}>
+                  <i className="fa-solid fa-trash" aria-hidden="true" /> Delete
                 </button>
               </div>
             )}
@@ -210,7 +205,7 @@ export function ChannelRow({
         onClick={onToggleExpand}
         aria-expanded={isExpanded}
       >
-        {isExpanded ? '∧ COLLAPSE' : '∨ VEL / PROB / ROLL'}
+        {isExpanded ? 'Collapse' : 'Expand'}
       </button>
 
       {/* ── Expansion panel ───────────────────────────────────────────────── */}
@@ -256,7 +251,7 @@ export function ChannelRow({
                 title="Delete channel"
                 aria-label="Delete channel"
               >
-                <TrashIcon /> Delete
+                <i className="fa-solid fa-trash" aria-hidden="true" /> Delete
               </button>
             </div>
           </div>
@@ -343,41 +338,58 @@ function SubRow({ label, groups, render }) {
 }
 
 function DragCell({ value, active, onDrag, display, normalize }) {
-  const draggingRef  = useRef(false)
-  const startYRef    = useRef(null)
-  const startValRef  = useRef(null)
+  const draggingRef = useRef(false)
+  const startYRef   = useRef(0)
+  const startValRef = useRef(0)
   const [dragging, setDragging] = useState(false)
+  const [rect, setRect] = useState(null)   // cell bounds for the floating value bubble
 
-  const handleMouseDown = useCallback((e) => {
-    e.preventDefault()
-    draggingRef.current  = true
+  // Pointer Events unify mouse + touch + pen; setPointerCapture keeps move/up
+  // events flowing to the cell even when the finger drifts off it. Combined with
+  // `touch-action: none` on the cell (CSS), the drag never scrolls the page.
+  const handlePointerDown = useCallback((e) => {
+    e.currentTarget.setPointerCapture(e.pointerId)
+    draggingRef.current = true
+    startYRef.current   = e.clientY
+    startValRef.current = value
+    setRect(e.currentTarget.getBoundingClientRect())
     setDragging(true)
-    startYRef.current    = e.clientY
-    startValRef.current  = value
+  }, [value])
 
-    function onMove(e) {
-      if (!draggingRef.current) return
-      const delta = (startYRef.current - e.clientY) / 100
-      const newNorm = Math.max(0, Math.min(1, normalize(startValRef.current) + delta))
-      onDrag(newNorm)
-    }
-    function onUp() {
-      draggingRef.current = false
-      setDragging(false)
-      document.removeEventListener('mousemove', onMove)
-      document.removeEventListener('mouseup', onUp)
-    }
-    document.addEventListener('mousemove', onMove)
-    document.addEventListener('mouseup', onUp)
-  }, [value, onDrag, normalize])
+  const handlePointerMove = useCallback((e) => {
+    if (!draggingRef.current) return
+    const delta = (startYRef.current - e.clientY) / 100
+    const newNorm = Math.max(0, Math.min(1, normalize(startValRef.current) + delta))
+    onDrag(newNorm)
+  }, [onDrag, normalize])
+
+  const endDrag = useCallback(() => {
+    draggingRef.current = false
+    setDragging(false)
+    setRect(null)
+  }, [])
 
   return (
-    <div
-      className={`ch-subrow-cell${!active ? ' inactive' : ''}${dragging ? ' dragging' : ''}`}
-      onMouseDown={handleMouseDown}
-    >
-      {active ? display(normalize(value)) : '–'}
-    </div>
+    <>
+      <div
+        className={`ch-subrow-cell${!active ? ' inactive' : ''}${dragging ? ' dragging' : ''}`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        {active ? display(normalize(value)) : '–'}
+      </div>
+      {dragging && rect && createPortal(
+        <div
+          className="ch-drag-bubble"
+          style={{ left: rect.left + rect.width / 2, top: rect.top }}
+        >
+          {display(normalize(value))}
+        </div>,
+        document.body
+      )}
+    </>
   )
 }
 
@@ -402,36 +414,6 @@ function RollCell({ value, active, onChange }) {
 
 // ─── Icons ─────────────────────────────────────────────────────────────────
 
-function MuteOffIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-      <path d="M2 5h2l3-3v10L4 9H2V5zm8.5 2a3 3 0 0 0-1.5-2.6v5.2A3 3 0 0 0 10.5 7z"/>
-    </svg>
-  )
-}
-
-function MuteOnIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-      <path d="M2 5h2l3-3v10L4 9H2V5z"/>
-      <line x1="9" y1="5" x2="13" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="13" y1="5" x2="9" y2="9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-    </svg>
-  )
-}
-
-function TrashIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
-      <polyline points="2,3 11,3"/>
-      <path d="M4 3V2h5v1"/>
-      <rect x="3" y="4" width="7" height="7" rx="1"/>
-      <line x1="5.5" y1="6.5" x2="5.5" y2="9"/>
-      <line x1="7.5" y1="6.5" x2="7.5" y2="9"/>
-    </svg>
-  )
-}
-
 function UploadIcon() {
   return (
     <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
@@ -451,31 +433,11 @@ function DragHandleIcon() {
   )
 }
 
-function ExpandIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-      <line x1="1" y1="3" x2="11" y2="3"/>
-      <line x1="1" y1="6" x2="11" y2="6"/>
-      <line x1="1" y1="9" x2="11" y2="9"/>
-    </svg>
-  )
-}
-
 function DupIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="4" y="4" width="7" height="7" rx="1"/>
       <path d="M2 8V2h6"/>
-    </svg>
-  )
-}
-
-function DotsIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true">
-      <circle cx="2" cy="6" r="1.2"/>
-      <circle cx="6" cy="6" r="1.2"/>
-      <circle cx="10" cy="6" r="1.2"/>
     </svg>
   )
 }

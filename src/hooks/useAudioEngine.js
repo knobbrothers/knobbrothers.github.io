@@ -168,9 +168,10 @@ export function useAudioEngine({ state, setCurrentStep, customSamples = [], onLo
     })
   }, [customSamples])
 
-  // Reload whenever channels change (new sample names appear)
+  // Reload whenever channels change (new sample names appear).
+  // Skip empty names — a clean channel has no sample assigned yet.
   useEffect(() => {
-    const names = [...new Set(state.channels.map(ch => ch.sample))]
+    const names = [...new Set(state.channels.map(ch => ch.sample).filter(Boolean))]
     names.forEach(loadSample)
   }, [state.channels, loadSample])
 

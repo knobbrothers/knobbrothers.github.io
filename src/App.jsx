@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, Fragment } from 'react'
-import { useSequencer } from './hooks/useSequencer'
+import { useSequencer, nextPatternName } from './hooks/useSequencer'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import { useBackingTrack } from './hooks/useBackingTrack'
 import { Transport } from './components/Transport'
@@ -9,7 +9,7 @@ import { PatternCard } from './components/PatternCard'
 import { BackingTrackPanel } from './components/BackingTrackPanel'
 import { NewProjectModal } from './components/NewProjectModal'
 import HelpModal from './components/HelpModal'
-import { serializeState, deserializeState, downloadPatternFile, encodeForUrl, decodeFromUrl } from './lib/serialize'
+import { serializeState, deserializeState, downloadPatternFile, decodeFromUrl } from './lib/serialize'
 import './App.css'
 
 function App() {
@@ -51,7 +51,6 @@ function App() {
 
   // ── Restore toast ────────────────────────────────────────────────────────
   const [restored, setRestored] = useState(false)
-  const [shareToast, setShareToast] = useState(false)
   const [showNewModal, setShowNewModal] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
 
@@ -143,6 +142,16 @@ function App() {
     setDropInsert(null)
   }
 
+  // ── Pattern-card drag-to-reorder (song mode) ───────────────────────────────
+  const [patternDragIdx, setPatternDragIdx] = useState(null)
+
+  function handlePatternDrop(targetIdx) {
+    if (patternDragIdx !== null && patternDragIdx !== targetIdx) {
+      reorderPatterns(patternDragIdx, targetIdx)
+    }
+    setPatternDragIdx(null)
+  }
+
   function handleFileDrop(files) {
     const audioFiles = Array.from(files).filter(f =>
       f.type.startsWith('audio/') || /\.(wav|mp3|ogg|flac|aiff?)$/i.test(f.name)
@@ -202,18 +211,6 @@ function App() {
     setCustomSamples([])
     localStorage.removeItem('sq32-autosave')
     newProject(kit, stepCount, name)
-  }
-
-  // ── Share ────────────────────────────────────────────────────────────────
-  function handleShare() {
-    const encoded = encodeForUrl(state)
-    const url     = `${window.location.origin}${window.location.pathname}#${encoded}`
-    navigator.clipboard.writeText(url).then(() => {
-      setShareToast(true)
-      setTimeout(() => setShareToast(false), 2500)
-    }).catch(() => {
-      window.location.hash = encoded
-    })
   }
 
   function addCustomSample(channelId, file) {
@@ -328,7 +325,6 @@ function App() {
   return (
     <div className="app">
       {restored && <div className="restore-toast">Session restored</div>}
-      {shareToast && <div className="restore-toast">Link copied!</div>}
       {showNewModal && (
         <NewProjectModal
           onConfirm={handleNewConfirm}
@@ -341,7 +337,6 @@ function App() {
         onSave={handleSave}
         onLoad={handleLoad}
         onNew={handleNew}
-        onShare={handleShare}
         onHelp={() => setShowHelp(true)}
         onUndo={undo}
         onRedo={redo}
@@ -361,7 +356,6 @@ function App() {
           currentIdx={state.currentPatternIdx}
           onSelect={setCurrentPattern}
           songMode={state.songMode}
-          onReorder={reorderPatterns}
           onToggleSongMode={toggleSongMode}
           playingPatternIdx={state.playingPatternIdx}
           stepCount={state.stepCount}
@@ -427,15 +421,20 @@ function App() {
                 pattern={pattern}
                 isActive={idx === state.currentPatternIdx}
                 isPlaying={state.playing && idx === state.playingPatternIdx}
-                stepCount={pattern.stepCount}
                 onClick={() => setCurrentPattern(idx)}
                 onRemove={state.patterns.length > 1 ? () => removePattern(pattern.id) : null}
+                draggable={state.patterns.length > 1}
+                isDragging={patternDragIdx === idx}
+                onDragStart={() => setPatternDragIdx(idx)}
+                onDragOver={e => e.preventDefault()}
+                onDrop={e => { e.preventDefault(); handlePatternDrop(idx) }}
+                onDragEnd={() => setPatternDragIdx(null)}
               />
             ))}
             {state.patterns.length < 4 && (
               <button className="pattern-card-create" onClick={addPattern}>
                 <span className="pattern-card-create-label">
-                  + Create Pattern {['A','B','C','D'][state.patterns.length]}
+                  + Create Pattern {nextPatternName(state.patterns)}
                 </span>
               </button>
             )}
