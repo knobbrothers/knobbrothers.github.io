@@ -34,6 +34,29 @@ export function ChannelRow({
   const [ctxOpen, setCtxOpen] = useState(false)
   const ctxRef = useRef(null)
 
+  // Keep the step grid and the VEL/PROB/ROLL sub-rows scrolling together
+  // horizontally — they're separate scroll containers so columns stay
+  // visually aligned when the user drags either one.
+  const gridScrollRef    = useRef(null)
+  const subrowsScrollRef = useRef(null)
+  const syncingScrollRef = useRef(false)
+
+  const handleGridScroll = useCallback((e) => {
+    if (syncingScrollRef.current) { syncingScrollRef.current = false; return }
+    if (subrowsScrollRef.current) {
+      syncingScrollRef.current = true
+      subrowsScrollRef.current.scrollLeft = e.currentTarget.scrollLeft
+    }
+  }, [])
+
+  const handleSubrowsScroll = useCallback((e) => {
+    if (syncingScrollRef.current) { syncingScrollRef.current = false; return }
+    if (gridScrollRef.current) {
+      syncingScrollRef.current = true
+      gridScrollRef.current.scrollLeft = e.currentTarget.scrollLeft
+    }
+  }, [])
+
   // Close context menu on outside click
   useEffect(() => {
     if (!ctxOpen) return
@@ -137,9 +160,9 @@ export function ChannelRow({
 
         {/* Right actions */}
         <div className="ch-right-actions">
-          {/* Expand toggle */}
+          {/* Expand toggle — same color whether expanded or collapsed */}
           <button
-            className={`ch-icon-btn ch-icon-btn--lg${isExpanded ? ' soloed' : ''}`}
+            className="ch-icon-btn ch-icon-btn--lg"
             onClick={onToggleExpand}
             title={isExpanded ? 'Collapse' : 'Expand'}
             aria-label={isExpanded ? 'Collapse channel' : 'Expand channel'}
@@ -189,7 +212,7 @@ export function ChannelRow({
       </div>
 
       {/* ── Step grid ────────────────────────────────────────────────────── */}
-      <div className="ch-grid-card">
+      <div className="ch-grid-card" ref={gridScrollRef} onScroll={handleGridScroll}>
         <StepGrid
           channel={channel}
           stepCount={stepCount}
@@ -217,6 +240,8 @@ export function ChannelRow({
             onSetVelocity={onSetVelocity}
             onSetProbability={onSetProbability}
             onSetRoll={onSetRoll}
+            scrollRef={subrowsScrollRef}
+            onScrollSync={handleSubrowsScroll}
           />
 
           {/* Bottom controls bar */}
@@ -275,7 +300,7 @@ export function ChannelRow({
 
 // ─── Sub-rows component ──────────────────────────────────────────────────────
 
-function SubRows({ channel, onSetVelocity, onSetProbability, onSetRoll }) {
+function SubRows({ channel, onSetVelocity, onSetProbability, onSetRoll, scrollRef, onScrollSync }) {
   const steps       = channel.steps
   const velocity    = channel.velocity    ?? Array(steps.length).fill(100)
   const probability = channel.probability ?? Array(steps.length).fill(100)
@@ -288,7 +313,7 @@ function SubRows({ channel, onSetVelocity, onSetProbability, onSetRoll }) {
   }
 
   return (
-    <div className="ch-subrows">
+    <div className="ch-subrows" ref={scrollRef} onScroll={onScrollSync}>
       <SubRow label="VEL" groups={groups} render={(i, active) => (
         <DragCell
           value={velocity[i]}

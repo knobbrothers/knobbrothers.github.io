@@ -12,7 +12,7 @@
 
 /* ── Modal panel ───────────────────────────────────────────────────────── */
 .export-modal {
-  background: var(--surface);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 24px;
@@ -146,17 +146,18 @@
   padding: 10px 0;
   border-radius: 6px;
   background: var(--active);
-  color: #fff;
+  border: 1px solid var(--active);
+  color: #000;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.04em;
   text-align: center;
-  transition: opacity 0.15s, transform 0.08s;
+  transition: filter 0.15s, transform 0.08s;
   min-height: 44px;
 }
 
 .export-go-btn:hover:not(:disabled) {
-  opacity: 0.9;
+  filter: brightness(1.1);
 }
 
 .export-go-btn:active:not(:disabled) {

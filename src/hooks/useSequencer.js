@@ -50,7 +50,9 @@ export function nextPatternName(patterns) {
   return PATTERN_NAMES.find(n => !used.has(n)) ?? `P${patterns.length + 1}`
 }
 
-function makePattern(id, name, channels, stepCount = STEP_COUNT, bpm = 120, swing = 0) {
+const DEFAULT_BPM = 140
+
+function makePattern(id, name, channels, stepCount = STEP_COUNT, bpm = DEFAULT_BPM, swing = 0) {
   return { id, name, channels, stepCount, bpm, swing }
 }
 
@@ -59,7 +61,7 @@ function makeBlankPattern(id, name) {
     ...makeChannel(ch.id, ch.name, ch.sample, ch.volume, STEP_COUNT),
     pan: ch.pan, swing: ch.swing,
   }))
-  return makePattern(id, name, channels, STEP_COUNT, 120, 0)
+  return makePattern(id, name, channels, STEP_COUNT, DEFAULT_BPM, 0)
 }
 
 // ─── Backing track ID counter ───────────────────────────────────────────────
@@ -265,9 +267,14 @@ function reducer(state, action) {
     }
 
     case 'SET_BPM':
-      return patchCurrentPattern(state, {
-        bpm: Math.max(60, Math.min(200, action.value)),
-      })
+      // Global like swing — all patterns share one tempo.
+      return {
+        ...state,
+        patterns: state.patterns.map(pat => ({
+          ...pat,
+          bpm: Math.max(60, Math.min(200, action.value)),
+        })),
+      }
 
     case 'SET_SWING':
       return {
@@ -405,7 +412,10 @@ function reducer(state, action) {
       const channels = templateChannels.map(ch =>
         makeChannel(ch.id, ch.name, ch.sample, ch.volume, STEP_COUNT)
       )
-      const newPattern = makePattern(newId, newName, channels, STEP_COUNT, 120, 0)
+      // Inherit the shared tempo/swing from an existing pattern (both are global).
+      const sharedBpm   = state.patterns[0]?.bpm   ?? DEFAULT_BPM
+      const sharedSwing = state.patterns[0]?.swing ?? 0
+      const newPattern = makePattern(newId, newName, channels, STEP_COUNT, sharedBpm, sharedSwing)
       return { ...state, patterns: [...state.patterns, newPattern] }
     }
 
@@ -626,7 +636,7 @@ export function useSequencer() {
           makeChannel(ci, kc.name, kc.sample, kc.volume ?? 0.8, stepCount)
         )
       : DEFAULT_CHANNELS.map(ch => makeChannel(ch.id, ch.name, ch.sample, ch.volume, stepCount))
-    const patterns = [makePattern(0, 'A', channels, stepCount, 120, 0)]
+    const patterns = [makePattern(0, 'A', channels, stepCount, DEFAULT_BPM, 0)]
     dispatch({ type: 'RESET_STATE', patterns, projectName })
   }, [])
 
